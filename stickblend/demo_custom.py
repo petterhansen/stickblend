@@ -36,14 +36,14 @@ def mixv(a, b, k):
 
 
 def cam_at(t: float):
-    """Smooth multi-beat camera glide & orbit across all 6 characters (three.js coords: Y up, -Z forward)."""
+    """Smooth wide-to-medium camera glide & orbit showing full characters head-to-toe with headroom."""
     keys = [
-        (0.0, (-3.4, 1.35, -0.2), (-2.1, 1.05, -2.5), 38),
-        (2.5, (-1.1, 1.40, -0.4), (-0.7, 1.05, -2.5), 38),
-        (5.2, (1.4, 1.45, -0.5), (1.0, 1.05, -2.5), 38),
-        (7.2, (3.2, 1.55, -1.2), (1.6, 1.05, -2.5), 40),
-        (8.4, (2.2, 1.70, -4.6), (0.0, 1.00, -2.5), 44),   # Orbit behind to show capes, ponytails, hats!
-        (10.0, (0.0, 1.65, 1.6), (0.0, 1.02, -2.5), 42),   # Wide finale pull-back
+        (0.0, (-3.2, 1.55, 2.2), (-2.4, 1.05, -2.5), 42),
+        (2.5, (-1.0, 1.55, 2.0), (-0.8, 1.05, -2.5), 42),
+        (5.2, (1.4, 1.55, 2.0), (1.1, 1.05, -2.5), 42),
+        (7.2, (4.2, 1.65, 0.8), (2.2, 1.05, -2.5), 44),
+        (8.6, (2.6, 1.85, -6.4), (0.0, 1.05, -2.5), 46),   # Clean back orbit showing cape, ponytail, hats!
+        (10.0, (0.0, 1.85, 4.4), (0.0, 1.05, -2.5), 46),   # Wide full-cast finale with headroom + shadows
     ]
     if t <= keys[0][0]:
         _, p, l, fov = keys[0]
@@ -86,7 +86,7 @@ def main():
         ("punk",      {"shoulderW": 0.16,  "torso": {"color": "222228", "details": [{"type": "strap", "color": "c8c8d0"}, {"type": "belt", "color": "1a1a1a", "buckle": "d0d0d8"}]}, "hair": {"style": "mohawk", "color": "d4323c"}, "face": {"scar": True}}),
     ]
 
-    xs = [-2.4, -1.44, -0.48, 0.48, 1.44, 2.4]
+    xs = [-3.125, -1.875, -0.625, 0.625, 1.875, 3.125]
     built = []
 
     def make_fn(idx, sp):
@@ -146,21 +146,40 @@ def main():
         cd.keyframe_insert("lens", frame=f)
         cd.dof.keyframe_insert("focus_distance", frame=f)
 
-    # Flatten 2.5D cutouts against moving camera
-    flat.flatten(built, cam, FRAMES, step=2, start=1)
+    argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+    stills = [int(x) for x in argv[0].split(",")] if argv else None
 
-    sc = stage.render_setup("final")
-    sc.render.resolution_x, sc.render.resolution_y = 1280, 720
-    sc.render.resolution_percentage = 100
-    sc.eevee.taa_render_samples = 6
-    sc.frame_start, sc.frame_end = 1, FRAMES
-    sc.render.image_settings.file_format = "JPEG"
-    sc.render.image_settings.quality = 95
-    sc.render.filepath = str(OUT_DIR / "f####")
-
-    world.optimize_shadows(cam=(0, 0, 0), max_dist=18)
-    bpy.ops.render.render(animation=True)
-    print("DEMO_OK", FRAMES, "frames in", round(time.time() - t0, 1), "s")
+    if stills:
+        sc = stage.render_setup("final")
+        sc.render.resolution_x, sc.render.resolution_y = 1280, 720
+        sc.render.resolution_percentage = 100
+        sc.eevee.taa_render_samples = 6
+        sc.render.image_settings.file_format = "JPEG"
+        sc.render.image_settings.quality = 95
+        world.optimize_shadows(cam=(0, 0, 0), max_dist=18)
+        for s_ in stills:
+            if "flat" in bpy.data.collections:
+                c_old = bpy.data.collections["flat"]
+                for o in list(c_old.objects): bpy.data.objects.remove(o, do_unlink=True)
+                bpy.data.collections.remove(c_old)
+            flat.flatten(built, cam, 1, step=1, start=s_)
+            sc.frame_set(s_)
+            sc.render.filepath = str(OUT_DIR / f"still_{s_:04d}")
+            bpy.ops.render.render(write_still=True)
+        print("STILLS_OK", len(stills), "in", round(time.time() - t0, 1), "s")
+    else:
+        flat.flatten(built, cam, FRAMES, step=2, start=1)
+        sc = stage.render_setup("final")
+        sc.render.resolution_x, sc.render.resolution_y = 1280, 720
+        sc.render.resolution_percentage = 100
+        sc.eevee.taa_render_samples = 6
+        sc.frame_start, sc.frame_end = 1, FRAMES
+        sc.render.image_settings.file_format = "JPEG"
+        sc.render.image_settings.quality = 95
+        world.optimize_shadows(cam=(0, 0, 0), max_dist=18)
+        sc.render.filepath = str(OUT_DIR / "f####")
+        bpy.ops.render.render(animation=True)
+        print("DEMO_OK", FRAMES, "frames in", round(time.time() - t0, 1), "s")
 
 
 if __name__ == "__main__":

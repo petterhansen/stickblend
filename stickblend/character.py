@@ -104,25 +104,37 @@ def _torso(ch, spec):
         elif t == "apron":
             bm = bmesh.new(); rows = []
             for j in range(9):
-                yn = 0.04 + 0.78 * j / 8; w = 0.65
-                rows.append([bm.verts.new(S(-w + 2 * w * i / 8, yn, 1.025)) for i in range(9)])
+                yn = 0.04 + 0.78 * j / 8; w = 0.62 if yn < 0.45 else 0.44
+                rows.append([bm.verts.new(S(-w + 2 * w * i / 8, yn, 1.03)) for i in range(9)])
             for j in range(8):
                 for i in range(8): bm.faces.new([rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]])
             bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
             _obj(ch, "apron", bm, mats.flat(col, edge=False), ch.E_torso, solid=0.008, thick=0.0025)
+            # Neck strap + waist tie + front pocket
+            neck_s = [S(-0.32, 0.80, 1.03), S(-0.36, 0.99, 1.03), S(0.36, 0.99, 1.03), S(0.32, 0.80, 1.03)]
+            _obj(ch, "apronstrap", geo.tube(bmesh.new(), neck_s, 0.011, 6), mats.flat(col), ch.E_torso, thick=0.002)
+            waist_s = [S(a, 0.44, 1.028) for a in (2 * math.pi * k / 24 for k in range(25))]
+            _obj(ch, "apronbelt", geo.tube(bmesh.new(), waist_s, 0.011, 6, caps=False), mats.flat(_dark(col, 0.75)), ch.E_torso, thick=0.002)
+            _obj(ch, "apronpocket", geo.box(bmesh.new(), (0.12, 0.08, 0.012), S(0, 0.24, 1.045), None, 0.12), mats.flat(_dark(col, 0.82), edge=False), ch.E_torso, thick=0.002)
         elif t == "suspenders":
             for s in (-1, 1):
                 path = [S(s * 0.34, 0.14 + 0.82 * k / 8, 1.02) for k in range(9)]
                 _obj(ch, "susp%d" % s, geo.tube(bmesh.new(), path, 0.012, 6), mats.flat(col), ch.E_torso, thick=0.002)
         elif t == "cape":
+            # Wide flared royal cape hanging cleanly behind the torso (visible from both front edges and back!)
             bm = bmesh.new(); rows = []
+            for j in range(9):
+                u = j / 8.0
+                yn = 0.96 - u * 1.12
+                hw = W * (0.95 + 0.55 * u)
+                zb = -(R(max(0.05, min(0.95, yn))) * depth * 1.12 + 0.04 + 0.16 * u)
+                rows.append([bm.verts.new(Vector((-hw + 2 * hw * i / 8, yn * tH, zb + 0.04 * math.sin(math.pi * i / 8)))) for i in range(9)])
             for j in range(8):
-                yn = -0.35 + 1.32 * j / 7; w = 0.95 - 0.35 * (j / 7)
-                rows.append([bm.verts.new(S(math.pi - w + 2 * w * i / 8, yn, 1.04 + (1 - j / 7) * 0.18)) for i in range(9)])
-            for j in range(7):
-                for i in range(8): bm.faces.new([rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]])
+                for i in range(8): bm.faces.new([rows[j][i], rows[j + 1][i], rows[j + 1][i + 1], rows[j][i + 1]])
             bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-            _obj(ch, "cape", bm, mats.flat(col), ch.E_torso, solid=0.010, thick=0.003)
+            _obj(ch, "cape", bm, mats.flat(col), ch.E_torso, solid=0.016, thick=0.0035)
+            # Gold collar clasp
+            _obj(ch, "capeclasp", geo.box(bmesh.new(), (0.055, 0.032, 0.018), S(0, 0.95, 1.05), None, 0.2), mats.flat("e0bc48"), ch.E_torso, thick=0.002)
         elif t == "skirt":
             rw = R(0.05) * 1.05
             bm = geo.lathe(bmesh.new(), [(rw * (1.32 - 0.32 * k / 6), tH * (0.28 * k / 6 - 0.16)) for k in range(7)], 32)
@@ -189,16 +201,21 @@ def _hair(ch, H):
         _obj(ch, "hair", bm, mats.flat(col), ch.E_head, thick=0.006, solid=-0.01)
         return
     elif style == "mohawk":
-        for k in range(7):
-            a = -0.35 + 0.24 * k
-            _obj(ch, "mohawk%d" % k, geo.box(bmesh.new(), (r * 0.14, r * 0.42, r * 0.22), (0, math.cos(a) * r * 1.08, math.sin(a) * r * 0.95), Matrix.Rotation(a, 3, "X"), 0.3), mats.flat(col), ch.E_head, thick=0.005)
+        for k in range(9):
+            a = -0.55 + 0.25 * k
+            _obj(ch, "mohawk%d" % k, geo.box(bmesh.new(), (r * 0.16, r * 0.56, r * 0.24), (0, math.cos(a) * r * 1.15, math.sin(a) * r * 1.02), Matrix.Rotation(a, 3, "X"), 0.25), mats.flat(col), ch.E_head, thick=0.005)
         return
     elif style == "curly":
-        for k in range(18):
-            ph = 2 * math.pi * k / 18; th = 0.45 + 0.52 * (k % 3) / 2
-            c = Vector((math.sin(th) * math.sin(ph), math.cos(th), math.sin(th) * math.cos(ph))) * r * 1.02
-            if c.z > r * 0.25 and c.y < r * 0.45: continue
-            _obj(ch, "curl%d" % k, geo.uvsphere(bmesh.new(), r * 0.24 * vol, (1, 1, 1), c, 14, 10), mats.flat(col), ch.E_head, thick=0.0045)
+        # Base hair cap + lush outer curls sitting cleanly outside the head sphere (r * 1.12)
+        cap = geo.uvsphere(bmesh.new(), r * 1.09, (1, 0.9, 1), (0, r * 0.22, -r * 0.04), 32, 18)
+        bmesh.ops.delete(cap, geom=[f for f in cap.faces if f.calc_center_median().y < r * 0.38 and f.calc_center_median().z > 0], context="FACES")
+        _obj(ch, "hair", cap, mats.flat(col), ch.E_head, thick=0.005, solid=-0.01)
+        for ring_i, (th, n_c) in enumerate(((0.35, 6), (0.72, 10), (1.05, 12))):
+            for k in range(n_c):
+                ph = 2 * math.pi * (k + 0.5 * ring_i) / n_c
+                c = Vector((math.sin(th) * math.sin(ph), math.cos(th), math.sin(th) * math.cos(ph))) * r * 1.10
+                if c.z > r * 0.28 and c.y < r * 0.42: continue
+                _obj(ch, f"curl{ring_i}_{k}", geo.uvsphere(bmesh.new(), r * 0.27 * vol, (1, 1, 1), c, 14, 10), mats.flat(col), ch.E_head, thick=0.004)
         return
     else:
         P = HAIR[style]
@@ -276,28 +293,30 @@ def _hat(ch, Hd):
         for v in bm.verts: v.co = M @ v.co
         _obj(ch, "capvisor", bm, mats.flat(dk), ch.E_head, solid=r * 0.04)
     elif t == "tophat":
-        _obj(ch, "tophatbrim", geo.cyl(bmesh.new(), r * 1.38, r * 1.38, r * 0.08, (0, r * 0.62, 0), None, 32), mats.flat(dk), ch.E_head)
-        _obj(ch, "tophatcrown", geo.cyl(bmesh.new(), r * 0.86, r * 0.94, r * 0.95, (0, r * 1.10, 0), None, 32), mats.flat(col), ch.E_head)
-        _obj(ch, "band", geo.cyl(bmesh.new(), r * 0.88, r * 0.89, r * 0.16, (0, r * 0.72, 0), None, 32), mats.flat(Hd.get("band", "8a2424")), ch.E_head, thick=0.003)
+        _obj(ch, "tophatbrim", geo.cyl(bmesh.new(), r * 1.46, r * 1.46, r * 0.08, (0, r * 0.66, 0), None, 32), mats.flat(dk), ch.E_head)
+        _obj(ch, "tophatcrown", geo.cyl(bmesh.new(), r * 0.88, r * 0.98, r * 1.15, (0, r * 1.24, 0), None, 32), mats.flat(col), ch.E_head)
+        _obj(ch, "band", geo.cyl(bmesh.new(), r * 0.91, r * 0.92, r * 0.18, (0, r * 0.78, 0), None, 32), mats.flat(Hd.get("band", "9e2428")), ch.E_head, thick=0.003)
     elif t == "fedora":
-        R = Matrix.Rotation(-0.14, 4, "X"); mt = CM @ R
-        _obj(ch, "fedorabrim", geo.cyl(bmesh.new(), r * 1.42, r * 1.42, r * 0.07, (0, r * 0.56, 0), None, 32), mats.flat(dk), ch.E_head, mtx=mt)
-        _obj(ch, "fedoracrown", geo.cyl(bmesh.new(), r * 0.80, r * 0.96, r * 0.58, (0, r * 0.85, 0), None, 32), mats.flat(col), ch.E_head, mtx=mt)
-        _obj(ch, "band", geo.cyl(bmesh.new(), r * 0.92, r * 0.95, r * 0.14, (0, r * 0.65, 0), None, 32), mats.flat(Hd.get("band", "222026")), ch.E_head, mtx=mt, thick=0.003)
+        R = Matrix.Rotation(-0.12, 4, "X"); mt = CM @ R
+        _obj(ch, "fedorabrim", geo.cyl(bmesh.new(), r * 1.52, r * 1.52, r * 0.07, (0, r * 0.62, 0), None, 32), mats.flat(dk), ch.E_head, mtx=mt)
+        _obj(ch, "fedoracrown", geo.cyl(bmesh.new(), r * 0.96, r * 0.76, r * 0.64, (0, r * 0.94, 0), None, 32), mats.flat(col), ch.E_head, mtx=mt)
+        _obj(ch, "band", geo.cyl(bmesh.new(), r * 0.95, r * 0.91, r * 0.16, (0, r * 0.72, 0), None, 32), mats.flat(Hd.get("band", "222026")), ch.E_head, mtx=mt, thick=0.003)
     elif t == "bowler":
-        _obj(ch, "bowlerbrim", geo.cyl(bmesh.new(), r * 1.32, r * 1.32, r * 0.07, (0, r * 0.56, 0), None, 32), mats.flat(dk), ch.E_head)
-        bm = geo.uvsphere(bmesh.new(), r * 0.96, (1, 0.92, 1), (0, r * 0.58, 0), 32, 20)
-        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.56], context="FACES")
+        _obj(ch, "bowlerbrim", geo.cyl(bmesh.new(), r * 1.38, r * 1.38, r * 0.07, (0, r * 0.62, 0), None, 32), mats.flat(dk), ch.E_head)
+        bm = geo.uvsphere(bmesh.new(), r * 0.96, (1, 0.92, 1), (0, r * 0.64, 0), 32, 20)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.62], context="FACES")
         _obj(ch, "bowlerdome", bm, mats.flat(col), ch.E_head, solid=-0.01)
     elif t == "beret":
-        R = Matrix.Rotation(0.18, 4, "Z"); mt = CM @ R
-        _obj(ch, "beret", geo.uvsphere(bmesh.new(), r * 1.15, (1.1, 0.34, 1.1), (0, r * 0.72, -r * 0.05), 32, 16), mats.flat(col), ch.E_head, mtx=mt)
-        _obj(ch, "beretstem", geo.cyl(bmesh.new(), r * 0.04, r * 0.04, r * 0.16, (0, r * 1.08, -r * 0.05), None, 8), mats.flat(dk), ch.E_head, mtx=mt)
+        R = Matrix.Rotation(0.22, 4, "Z"); mt = CM @ R
+        _obj(ch, "beret", geo.uvsphere(bmesh.new(), r * 1.18, (1.12, 0.36, 1.12), (0, r * 0.78, -r * 0.04), 32, 16), mats.flat(col), ch.E_head, mtx=mt)
+        _obj(ch, "beretstem", geo.cyl(bmesh.new(), r * 0.045, r * 0.045, r * 0.18, (0, r * 1.16, -r * 0.04), None, 8), mats.flat(dk), ch.E_head, mtx=mt)
     elif t == "crown":
-        _obj(ch, "crownbase", geo.cyl(bmesh.new(), r * 0.96, r * 0.90, r * 0.24, (0, r * 0.85, 0), None, 24), mats.flat(Hd.get("color", "e0b844")), ch.E_head)
+        ccol = Hd.get("color", "eab838")
+        _obj(ch, "crownbase", geo.cyl(bmesh.new(), r * 0.98, r * 1.06, r * 0.36, (0, r * 0.96, 0), None, 24), mats.flat(ccol), ch.E_head)
         for k in range(6):
             a = 2 * math.pi * k / 6
-            _obj(ch, "crownpt%d" % k, geo.lathe(bmesh.new(), [(r * 0.14, r * 0.95), (0.001, r * 1.25)], 8), mats.flat(Hd.get("color", "e0b844")), ch.E_head, mtx=CM @ Matrix.Translation((math.sin(a) * r * 0.88, 0, math.cos(a) * r * 0.88)))
+            _obj(ch, "crownpt%d" % k, geo.lathe(bmesh.new(), [(r * 0.22, r * 1.12), (0.001, r * 1.54)], 10), mats.flat(ccol), ch.E_head, mtx=CM @ Matrix.Translation((math.sin(a) * r * 0.90, 0, math.cos(a) * r * 0.90)))
+            _obj(ch, "crownjewel%d" % k, geo.uvsphere(bmesh.new(), r * 0.085, (1, 1, 1), (math.sin(a) * r * 1.04, r * 0.96, math.cos(a) * r * 1.04), 10, 8), mats.flat("c82428" if k % 2 == 0 else "2458b8", edge=False), ch.E_head, thick=0.002)
     elif t == "pickelhaube":
         bm = geo.uvsphere(bmesh.new(), r * 1.04, (1, 0.9, 1), (0, r * 0.35, 0), 32, 20)
         bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.35], context="FACES")

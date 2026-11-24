@@ -26,17 +26,17 @@ POSES = {
     "shrug": {"handL": (0.36, 1.1, 0.2), "handR": (-0.36, 1.1, 0.2), "headRoll": 10},
     "sit": {"sit": 0.46, "lean": 8},
     "oil": {"crouch": 0.4, "lean": 18, "handL": (0.22, 0.6, 0.36), "handR": (-0.05, 0.62, 0.38), "headPitch": 16},
-    "cheer": {"handL": (0.34, 1.88, 0.14), "handR": (-0.34, 1.88, 0.14), "lean": -6, "headPitch": -12},
-    "facepalm": {"handR": (-0.04, 1.46, 0.22), "handL": (0.24, 0.72, 0.04), "headPitch": 16, "lean": 6},
-    "crossed": {"handL": (-0.12, 1.02, 0.24), "handR": (0.12, 1.00, 0.22), "lean": -3},
+    "cheer": {"handL": (0.34, 1.72, 0.14), "handR": (-0.34, 1.72, 0.14), "lean": -5, "headPitch": -10},
+    "facepalm": {"handR": (-0.06, 1.32, 0.30), "handL": (0.24, 0.72, 0.04), "headPitch": 14, "lean": 5},
+    "crossed": {"handL": (-0.10, 0.96, 0.28), "handR": (0.10, 0.94, 0.26), "lean": -2},
     "kneel": {"crouch": 0.38, "lean": 10, "handL": (0.14, 0.66, 0.32), "handR": (-0.14, 0.66, 0.32), "headPitch": 10},
-    "nervous": {"handL": (0.04, 0.92, 0.26), "handR": (-0.04, 0.92, 0.26), "lean": 8, "headPitch": 10},
-    "clap": {"handL": (0.02, 1.06, 0.28), "handR": (-0.02, 1.06, 0.28), "headPitch": -4},
-    "whisper": {"handR": (-0.05, 1.36, 0.24), "lean": 14, "headYaw": 12},
-    "bow": {"lean": 34, "headPitch": 18, "handL": (0.20, 0.62, 0.24), "handR": (-0.20, 0.62, 0.24)},
+    "nervous": {"handL": (0.05, 0.90, 0.28), "handR": (-0.05, 0.90, 0.28), "lean": 8, "headPitch": 10},
+    "clap": {"handL": (0.02, 1.02, 0.32), "handR": (-0.02, 1.02, 0.32), "headPitch": -3},
+    "whisper": {"handR": (-0.08, 1.24, 0.30), "handL": (0.24, 0.74, 0.04), "lean": 10, "headYaw": 12},
+    "bow": {"lean": 28, "headPitch": 14, "handL": (0.22, 0.62, 0.26), "handR": (-0.22, 0.62, 0.26)},
     "present": {"armL": {"pitch": 62, "roll": 28, "bend": 12}, "handR": (-0.24, 0.72, 0.06), "headYaw": 10, "lean": 4},
     "kick": {"legR": {"pitch": -70, "bend": 12}, "armL": {"pitch": 35, "bend": 25}, "lean": -10},
-    "lean_back": {"lean": -14, "headPitch": -10, "handL": (0.26, 0.80, 0.02), "handR": (-0.26, 0.80, 0.02)},
+    "lean_back": {"lean": -12, "headPitch": -8, "handL": (0.26, 0.80, 0.02), "handR": (-0.26, 0.80, 0.02)},
 }
 REST = {"L": (0.24, 0.7, 0.04), "R": (-0.24, 0.7, 0.04)}
 
@@ -124,7 +124,9 @@ def stick_rig(spec, pose=None, t=0.0, walk=0.0, talk=0.0, phase=0.0, run=0.0):
     neck = T((0, torsoH + headR * 0.82, 0))
     def arm(side, sh, l, target):
         if target:
-            e, h = ik2(sh, Vector(target), armLen / 2, armLen / 2, Vector((side * 0.8, -0.5, -0.4))); return {"sh": sh, "e": e, "h": h}
+            # Elbow pole points outward and forward-down so arms never fold backward through head/torso
+            pole = Vector((side * 0.9, -0.55, 0.35))
+            e, h = ik2(sh, Vector(target), armLen / 2, armLen / 2, pole); return {"sh": sh, "e": e, "h": h}
         ua = tq @ limb_dir(l.get("pitch", 0), l.get("roll", 0), side); e = sh + ua * (armLen / 2)
         fa = tq @ limb_dir(l.get("pitch", 0) + l.get("bend", 0), l.get("roll", 0) * 0.6, side)
         return {"sh": sh, "e": e, "h": e + fa * (armLen / 2)}

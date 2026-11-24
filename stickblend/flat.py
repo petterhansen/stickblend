@@ -38,10 +38,10 @@ def _smooth(a, b, x):
 
 # Feste Stapelreihenfolge der Details auf ihrem Traeger (wie Ebenen einer Cut-out-Puppe).
 # Nie nach Tiefe sortieren: Teile auf gleicher Hoehe (Guertel/Taschen/Schnalle) tauschen sonst von Bild zu Bild die Reihenfolge.
-LAYERS = {"cape": -1, "skirt": 0, "panel": 0, "pack": 0, "bedroll": 1, "lapel": 1, "patch": 1, "pocket": 1, "apron": 2, "placket": 2, "susp": 3, "belt": 3, "tieknot": 4, "tiebody": 4, "button": 4, "buckle": 5, "pouch": 5,
-          "ribbon": 5, "star": 5, "strap": 6, "camstrap": 6, "packstrap": 6, "tab": 7, "collar": 7, "ep": 7, "scarf": 8, "scarftail": 8, "camera": 8, "bow": 8, "lens": 9,
-          "hair": 1, "hairlong": 1, "hairbun": 1, "curl": 1, "mohawk": 1, "flap": 2, "crown": 2, "beanie": 2, "capdome": 2, "tophatcrown": 2, "fedoracrown": 2, "bowlerdome": 2, "beret": 2, "crownbase": 2, "crownpt": 2, "helm_dome": 2, "helm_spike": 2,
-          "band": 3, "tophatbrim": 3, "fedorabrim": 3, "bowlerbrim": 3, "beretstem": 3, "headband": 4, "visor": 4, "capvisor": 4, "badge": 5, "bridge": 6, "monocle": 6, "helmring": 6, "helmet": 8, "glint": 9}
+LAYERS = {"cape": -2, "skirt": 0, "panel": 0, "pack": 0, "bedroll": 1, "lapel": 1, "patch": 1, "pocket": 1, "apron": 2, "apronbelt": 3, "apronpocket": 4, "apronstrap": 4, "placket": 2, "susp": 3, "belt": 3, "tieknot": 4, "tiebody": 4, "button": 4, "buckle": 5, "pouch": 5,
+          "ribbon": 5, "star": 5, "strap": 6, "camstrap": 6, "packstrap": 6, "tab": 7, "collar": 7, "ep": 7, "capeclasp": 8, "scarf": 8, "scarftail": 8, "camera": 8, "bow": 8, "lens": 9,
+          "hair": 1, "hairlong": 1, "hairbun": 1, "curl": 2, "mohawk": 2, "flap": 2, "crown": 2, "beanie": 2, "capdome": 2, "tophatcrown": 3, "fedoracrown": 3, "bowlerdome": 3, "beret": 3, "crownbase": 3, "crownpt": 3, "crownjewel": 5, "helm_dome": 3, "helm_spike": 3,
+          "band": 4, "tophatbrim": 4, "fedorabrim": 4, "bowlerbrim": 4, "beretstem": 4, "headband": 4, "visor": 4, "capvisor": 4, "badge": 5, "bridge": 6, "monocle": 6, "helmring": 6, "helmet": 8, "glint": 9}
 def _base(o): return o.name.split(".")[0]   # Blender haengt ".001" an, wenn der Name schon vergeben ist (Empty "x_torso" vs. Mesh "x_torso")
 def _layer(o, ch):
     key = _base(o)[len(ch.name) + 1:].rstrip("0123456789-")
