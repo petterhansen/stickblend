@@ -1,0 +1,18 @@
+{
+  "voice": "Charon",
+  "tempo": 1.06,
+  "model": "gemini-2.5-flash-preview-tts",
+  "language": "en",
+  "style": "",
+  "initial_prompt": "",
+  "lines": [
+    {
+      "id": "hook",
+      "text": "Replace this with your opening hook line."
+    },
+    {
+      "id": "cta",
+      "text": "Replace this with your closing line."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+node_modules/
+assets3d/
+assets_audio/
+remotion/out/
+remotion/public/shorts/
+*/out/
+*/audio/voice.raw.wav
+*/audio/voice.src.wav
+*/audio/voice.pcm
