@@ -65,13 +65,28 @@ def _classify(o, ch):
     if "_hand" in o.name: return "hand"
     return "body"
 
-def flatten(chars, cam, frames, step=2, start=1, lw_px=LW_PX):
+def flatten(chars, cam, frames, step=2, start=1, lw_px=LW_PX, pov=None, pov_hands=True):
+    """Project characters onto camera-facing 2.5D cutouts.
+
+    `pov` can be None, a Char, or a callable `f -> Char | None` for first-person POV shots:
+    the active POV character is omitted from 2.5D cutouts on its POV frames (while still
+    casting 3D shadows), and if `pov_hands=True` its 3D arms/hands remain camera-visible.
+    """
     sc = bpy.context.scene; ink = mats.STYLE["ink"]
     coll = bpy.data.collections.new("flat"); sc.collection.children.link(coll)
     for ch in chars: make_proxy(ch)
     for f in range(start, start + frames, step):
         sc.frame_set(f); dg = bpy.context.evaluated_depsgraph_get()
+        active_pov = pov(f) if callable(pov) else pov
         for ch in chars:
+            if pov is not None and pov_hands:
+                is_pov = (ch is active_pov)
+                for o in ch.coll.all_objects:
+                    if o.type == "MESH" and ("_arm" in o.name or "_hand" in o.name):
+                        o.visible_camera = is_pov
+                        o.keyframe_insert("visible_camera", frame=f)
+            if ch is active_pov:
+                continue
             anchor = ch.E_torso.matrix_world.translation.copy()
             cp, n, R, U = _cam_basis(cam, anchor)
             Lw = (Vector(LIGHT_POS) - anchor).normalized() if LIGHT_POS is not None else (R * LIGHT[0] + U * LIGHT[1] + n * LIGHT[2]).normalized()

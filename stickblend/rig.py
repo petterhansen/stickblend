@@ -4,7 +4,7 @@ Figurenraum wie in three.js: x = linke Koerperseite (+), y = oben, z = vorne. Fu
 Die Umrechnung nach Blender (z oben) passiert erst beim Zeichnen (draw.py: tb()).
 """
 import math
-from mathutils import Vector, Quaternion, Euler
+from mathutils import Vector, Quaternion, Euler, Matrix
 
 D = math.pi / 180
 
@@ -177,3 +177,23 @@ def walk_along(t, waypoints):
     px, pz = waypoints[-2][1], waypoints[-2][2]
     yaw = math.atan2(x - px, z - pz) if math.hypot(x - px, z - pz) > 0.05 else 0.0
     return (x, 0.0, z), yaw, 0.0
+
+
+def pov_pose(ch, eye_fwd=0.0, eye_up=0.04, roll_keep=0.30):
+    """Return (location, rotation_quaternion, forward) for a first-person POV camera at `ch`'s eyes.
+
+    Requires the scene frame to be evaluated (`sc.frame_set(f)`).
+    In E_head local Blender space (via CM): forward is -Y, up is +Z.
+    """
+    M = ch.E_head.matrix_world
+    R3 = M.to_3x3()
+    r = ch.pr["headR"]
+    loc = M @ Vector((0.0, -r * (0.92 + eye_fwd), r * eye_up))
+    fwd = (R3 @ Vector((0.0, -1.0, 0.0))).normalized()
+    head_up = (R3 @ Vector((0.0, 0.0, 1.0))).normalized()
+    up = Vector((0.0, 0.0, 1.0)).lerp(head_up, roll_keep).normalized()
+    z_cam = -fwd
+    x_cam = up.cross(z_cam).normalized()
+    y_cam = z_cam.cross(x_cam).normalized()
+    quat = Matrix((x_cam, y_cam, z_cam)).transposed().to_quaternion()
+    return loc, quat, fwd
