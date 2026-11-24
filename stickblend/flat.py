@@ -39,7 +39,7 @@ def _smooth(a, b, x):
 # Feste Stapelreihenfolge der Details auf ihrem Traeger (wie Ebenen einer Cut-out-Puppe).
 # Nie nach Tiefe sortieren: Teile auf gleicher Hoehe (Guertel/Taschen/Schnalle) tauschen sonst von Bild zu Bild die Reihenfolge.
 LAYERS = {"cape": -2, "skirt": 0, "panel": 0, "pack": 0, "bedroll": 1, "lapel": 1, "patch": 1, "pocket": 1, "apron": 2, "apronbelt": 3, "apronpocket": 4, "apronstrap": 4, "placket": 2, "susp": 3, "belt": 3, "tieknot": 4, "tiebody": 4, "button": 4, "buckle": 5, "pouch": 5,
-          "ribbon": 5, "star": 5, "strap": 6, "camstrap": 6, "packstrap": 6, "tab": 7, "collar": 7, "ep": 7, "capeclasp": 8, "scarf": 8, "scarftail": 8, "camera": 8, "bow": 8, "lens": 9,
+          "ribbon": 5, "star": 5, "strap": 6, "camstrap": 6, "packstrap": 6, "tab": 7, "collar": 7, "ep": 7, "capeclasp": 8, "hood": -1, "string": 5, "scarf": 8, "scarftail": 8, "camera": 8, "bow": 8, "lens": 9,
           "hair": 1, "hairlong": 1, "hairbun": 1, "curl": 2, "mohawk": 2, "flap": 2, "crown": 2, "beanie": 2, "capdome": 2, "tophatcrown": 3, "fedoracrown": 3, "bowlerdome": 3, "beret": 3, "crownbase": 3, "crownpt": 3, "helm_dome": 3, "helm_spike": 3,
           "tophatbrim": 4, "fedorabrim": 4, "bowlerbrim": 4, "beretstem": 4, "headband": 4, "visor": 4, "capvisor": 4, "band": 5, "crownjewel": 5, "badge": 5, "bridge": 6, "monocle": 6, "helmring": 6, "helmet": 8, "glint": 9}
 def _base(o): return o.name.split(".")[0]   # Blender haengt ".001" an, wenn der Name schon vergeben ist (Empty "x_torso" vs. Mesh "x_torso")
@@ -211,7 +211,9 @@ def flatten(chars, cam, frames, step=2, start=1, lw_px=LW_PX, pov=None, pov_hand
                         pts.add((round(a[0], 5), round(a[1], 5))); pts.add((round(b[0], 5), round(b[1], 5)))
                     for x, y in pts:
                         poly([(x + math.cos(2 * math.pi * k / 8) * lw, y + math.sin(2 * math.pi * k / 8) * lw) for k in range(8)], Lr + 0.0003, mi)
-            me = bpy.data.meshes.new(f"flat_{ch.name}_{f:04d}"); me.from_pydata([tuple(v) for v in verts], [], faces)
+            bias = getattr(ch, "flat_bias", 0.0); bias = bias(f) if callable(bias) else bias   # Ebene zur Kamera ruecken (vor Waende), Bildgroesse bleibt gleich
+            dist = (cp - anchor).length; kb = max(0.05, (dist - bias) / dist) if bias else 1.0
+            me = bpy.data.meshes.new(f"flat_{ch.name}_{f:04d}"); me.from_pydata([tuple(cp + (v - cp) * kb) for v in verts], [], faces)
             for m in mlist: me.materials.append(m)
             ca = me.color_attributes.new("shade", "BYTE_COLOR", "CORNER"); uvl = me.uv_layers.new(name="puppet")
             sh = mats.SHADE
@@ -221,7 +223,7 @@ def flatten(chars, cam, frames, step=2, start=1, lw_px=LW_PX, pov=None, pov_hand
                     ca.data[li_].color = (sh[0] + (1 - sh[0]) * s_, sh[1] + (1 - sh[1]) * s_, sh[2] + (1 - sh[2]) * s_, 1.0)
                     v = Vector(verts[me.loops[li_].vertex_index]) - anchor; uvl.data[li_].uv = (R.dot(v), U.dot(v))
             ob = bpy.data.objects.new(me.name, me); coll.objects.link(ob); ob.visible_shadow = False; ob.lineart.usage = "EXCLUDE"
-            keys = ([(start, True)] if f > start else []) + [(f, False), (f + step, True)]
+            keys = ([(start, True)] if f > start else ([(start - 1, True)] if start > 1 else [])) + [(f, False), (f + step, True)]   # vor dem eigenen Frame unsichtbar (Einzelbilder!)
             for kf, hide in keys: ob.hide_render = hide; ob.keyframe_insert("hide_render", frame=kf)
     sc.frame_set(start)
     return coll

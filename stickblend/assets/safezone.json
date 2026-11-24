@@ -1,0 +1,34 @@
+{
+ "frame": [
+  1080,
+  1920
+ ],
+ "safe": {
+  "x0": 45,
+  "y0": 120,
+  "x1": 1031,
+  "y1": 1540
+ },
+ "cut_top": {
+  "x0": 307,
+  "y0": 120,
+  "x1": 760,
+  "y1": 212,
+  "why": "Suchfeld/Tabs"
+ },
+ "cut_right": {
+  "x0": 885,
+  "y0": 957,
+  "x1": 1031,
+  "y1": 1540,
+  "why": "Like/Kommentar/Teilen-Leiste"
+ },
+ "caption_box": {
+  "x0": 70,
+  "y0": 980,
+  "x1": 860,
+  "y1": 1500,
+  "why": "Untertitel: unterhalb der Bildmitte, links der Button-Leiste"
+ },
+ "source": "TikTok-Safe-Zone-Maske (Made by @alexeidelacuesta, via @raphvest), gilt praktisch auch fuer YouTube Shorts/Reels"
+}

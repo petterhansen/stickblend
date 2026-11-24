@@ -8,9 +8,9 @@ Primitive:
 """
 import math
 
-MOODS = ["neutral", "happy", "laugh", "smug", "sly", "shock", "scared", "angry", "sad", "worry", "tired", "determined", "suspicious", "proud", "cry", "closed"]
+MOODS = ["neutral", "happy", "laugh", "smug", "sly", "shock", "scared", "angry", "sad", "worry", "tired", "determined", "suspicious", "proud", "cry", "closed", "puzzled", "bored"]
 BROWS = {"neutral": (0, 0), "happy": (-8, -6), "laugh": (-10, -8), "smug": (6, -6), "sly": (10, -6), "shock": (-26, -20), "scared": (-22, 6), "angry": (22, -10), "sad": (-18, 10),
-         "worry": (-18, 8), "tired": (-4, 8), "determined": (16, -6), "suspicious": (14, -2), "proud": (6, -8), "cry": (-20, 10), "closed": (0, 0)}
+         "worry": (-18, 8), "tired": (-4, 8), "determined": (16, -6), "suspicious": (14, -2), "proud": (6, -8), "cry": (-20, 10), "closed": (0, 0), "puzzled": (0, 0), "bored": (2, 6)}
 
 def q2(a, c, b, n=10):
     return [(a[0] * (1 - t) ** 2 + c[0] * 2 * t * (1 - t) + b[0] * t * t, a[1] * (1 - t) ** 2 + c[1] * 2 * t * (1 - t) + b[1] * t * t) for t in (i / n for i in range(n + 1))]
@@ -51,7 +51,7 @@ def face_prims(mood="neutral", blink=False, mouth=0.0, look=(0, 0), stubble=Fals
         if m in ("happy", "laugh"): P.append(("line", q2((x - 24, y + 8), (x, y - 22), (x + 24, y + 8)), 11, ink, False)); continue
         if m in ("shock", "scared"):
             P.append(("fill", ell(x, y, 30, 34), "ffffff", 8)); P.append(("dot", (x + lx * 0.6, y + ly * 0.6), 10, ink)); continue
-        sq = 0.55 if m in ("suspicious", "sly", "smug") else 0.6 if m == "tired" else 0.8 if m in ("determined", "angry") else 1.0
+        sq = 0.42 if m == "bored" else 0.55 if m in ("suspicious", "sly", "smug") else 0.6 if m == "tired" else 0.8 if m in ("determined", "angry") else 1.0
         if eyes == "white":   # weisse Augen mit Pupille (zweite Referenz)
             P.append(("fill", ell(x, y, 27, 30 * max(0.55, sq)), "ffffff", 7)); P.append(("fill", ell(x + lx * 0.8, y + ly * 0.8 + 3, 11, 12 * max(0.6, sq)), ink, 0))
             if sq < 0.7: P.append(("fill", [(x - 30, y - 32), (x + 30, y - 32), (x + 30, y - 30 * sq + 6), (x - 30, y - 30 * sq + 6)], "f4efe6", 0)); P.append(("line", [(x - 28, y - 30 * sq + 6), (x + 28, y - 30 * sq + 6)], 7, ink, False))
@@ -61,7 +61,8 @@ def face_prims(mood="neutral", blink=False, mouth=0.0, look=(0, 0), stubble=Fals
         if m == "tired": P.append(("line", q2((x - 20, y + 26), (x, y + 34), (x + 20, y + 26)), 6, ink, False))
         if sq < 0.7: P.append(("line", [(x - 24, y - 12), (x + 24, y - 14)], 9, ink, False))
     bi, bo = BROWS.get(m, (0, 0))
-    for x, l, r in ((196, bo, bi), (316, bi, bo)): P.append(("line", q2((x - 32, 188 + l), (x, 176 + (l + r) / 2), (x + 32, 188 + r)), 13, ink, False))
+    brs = (((196, -30, -22), (316, 6, 10)) if m == "puzzled" else ((196, bo, bi), (316, bi, bo)))   # puzzled: eine Braue hoch
+    for x, l, r in brs: P.append(("line", q2((x - 32, 188 + l), (x, 176 + (l + r) / 2), (x + 32, 188 + r)), 13, ink, False))
     if nose: P.append(("line", [(286, 252), (296, 312), (276, 316)], 8, ink, False))
     mo = max(0.0, min(1.0, mouth)); mx, my = 262, 362
     if m in ("shock", "scared"): P.append(("fill", ell(mx, my + 8, 22 + mo * 6, 30 + mo * 12), mouth_dark, 8))
@@ -71,6 +72,8 @@ def face_prims(mood="neutral", blink=False, mouth=0.0, look=(0, 0), stubble=Fals
     elif m in ("happy", "proud"): P.append(("line", q2((mx - 44, my - 8), (mx, my + 32), (mx + 42, my - 10)), 10, ink, False))
     elif m in ("smug", "sly"): P.append(("line", q2((mx - 46, my - 10), (mx - 10, my + 16), (mx + 40, my - 6)), 10, ink, False))
     elif m in ("sad", "cry", "angry", "worry"): P.append(("line", q2((mx - 34, my + 12), (mx, my - 12), (mx + 34, my + 10)), 10, ink, False))
+    elif m == "puzzled": P.append(("line", [(mx - 30, my + 6), (mx + 30, my - 6)], 10, ink, False))
+    elif m == "bored": P.append(("line", [(mx - 26, my + 2), (mx + 26, my + 2)], 10, ink, False))
     elif m == "determined": P.append(("line", [(mx - 32, my), (mx + 32, my - 2)], 10, ink, False))
     else: P.append(("line", q2((mx - 30, my), (mx, my + 8), (mx + 30, my - 2)), 10, ink, False))
     if tears or m == "cry":

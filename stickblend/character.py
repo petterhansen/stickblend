@@ -91,11 +91,19 @@ def _torso(ch, spec):
             _obj(ch, "ribbon", geo.box(bmesh.new(), (0.095, 0.035, 0.012), S(0.28, 0.72, 1.03), nrm_rot(0.28), 0.1), mats.flat("c8352f"), ch.E_torso, thick=0.002)
             for idx, (phi, yn) in enumerate(((0.52, 0.54), (0.48, 0.38))):
                 _obj(ch, "star%d" % idx, geo.cyl(bmesh.new(), 0.028, 0.028, 0.012, S(phi, yn, 1.035), nrm_rot(phi).to_matrix() @ Matrix.Rotation(math.pi / 2, 3, "X"), 8), mats.flat("e8d278"), ch.E_torso, thick=0.002)
-        elif t == "tie":
-            c = S(0, 0.90, 1.03)
+        elif t == "tie":   # length = Laenge (Torsohoehen), blow = seitliches Wehen (+ = Figur-links), Ende flattert waagerecht
+            c = S(0, 0.86, 1.08); ln = d.get("length", 0.54); bl = d.get("blow", 0.0)
             _obj(ch, "tieknot", geo.box(bmesh.new(), (0.036, 0.032, 0.018), c, None, 0.2), mats.flat(col), ch.E_torso, thick=0.002)
-            path = [S(0, 0.88 - 0.54 * k / 6, 1.028) for k in range(7)]
-            _obj(ch, "tiebody", geo.tube(bmesh.new(), path, 0.022, 6), mats.flat(col), ch.E_torso, thick=0.002)
+            path = []
+            for k in range(15):
+                u = k / 14
+                if bl and u > 0.4:   # ab der Brust waagerecht im Wind
+                    v = (u - 0.4) / 0.6; base_ = S(0, 0.86 - ln * 0.4, 1.08)
+                    path.append(base_ + Vector((bl * ln * tH * 1.25 * v, -0.06 * math.sin(v * math.pi * 1.5) - 0.05 * v, 0.03 * v)))
+                else: path.append(S(0, 0.86 - ln * u, 1.08))
+            _obj(ch, "tiebody", geo.tube(bmesh.new(), path, 0.032, 6), mats.flat(col), ch.E_torso, thick=0.002)
+        elif t == "hood":   # Hoodie: Kapuze im Nacken, Kordeln, Bauchtasche
+            _obj(ch, "pocket", geo.box(bmesh.new(), (0.22, 0.1, 0.012), S(0, 0.3, 1.07), None, 0.25), mats.flat(col, edge=False), ch.E_torso, thick=0.0025)
         elif t == "scarf":
             pts = [S(a, 0.96, 1.04) for a in (2 * math.pi * k / 24 for k in range(25))]
             _obj(ch, "scarf", geo.tube(bmesh.new(), pts, 0.034, 8, caps=False), mats.flat(col), ch.E_torso, thick=0.003)
@@ -280,6 +288,15 @@ def _hat(ch, Hd):
         _obj(ch, "helmring", geo.tube(bmesh.new(), ring, r * 0.09, 10, caps=False), mats.flat("b8bcc6"), ch.E_head, thick=0.003)
         arc = [Vector((math.sin(a) * R * 0.97, cy + math.cos(a) * R * 0.97 * 0.9, R * 0.25)) for a in (-0.95 + 0.5 * k / 10 for k in range(11))]
         _obj(ch, "glint", geo.tube(bmesh.new(), arc, r * 0.05, 6), mats.flat("ffffff", edge=False), ch.E_head, hull=False)
+    elif t == "hardhat":   # Bauhelm: Kuppel, schmale Krempe (vorne etwas laenger)
+        R = Matrix.Rotation(-0.1, 4, "X"); mt = CM @ R
+        bm = geo.uvsphere(bmesh.new(), r * 1.08, (1, 0.92, 1.05), (0, r * 0.3, 0), 40, 24)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.32], context="FACES")
+        _obj(ch, "capdome", bm, mats.flat(col), ch.E_head, mtx=mt, solid=-0.01)
+        bm = geo.lathe(bmesh.new(), [(r * 1.0, 0), (r * 1.16, 0)], 40)
+        for v in bm.verts:
+            v.co.y = r * 0.33; v.co.z *= 1.0 + 0.22 * max(0.0, v.co.z / r)
+        _obj(ch, "visor", bm, mats.flat(dk), ch.E_head, mtx=mt, solid=r * 0.04)
     elif t == "beanie":
         bm = geo.uvsphere(bmesh.new(), r * 1.08, (1, 0.85, 1), (0, r * 0.3, -r * 0.02), 40, 24)
         bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.32], context="FACES")

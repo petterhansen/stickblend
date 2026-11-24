@@ -7,11 +7,11 @@ Felder (alle optional ausser name/torso):
   skin              Hautfarbe (Kopf, Haende)
   limbs             Farbe der Strichglieder (Standard: Tusche)
   torso             {color, width, depth, profile, details: [...]}
-                    details: buttons, placket, strap, belt, collar, pockets, pouches, camera, bowtie, tie, panel, tabs
+                    details: buttons, placket, strap, belt, collar, pockets, pouches, camera, bowtie, tie (length, blow), hood, panel, tabs
   sleeves / pants   {color, len (0..1), r}  -> Stoff ueber den Strichgliedern
   puttees, shoes    Farben
   hair              {style: short|bowl|bob|long|sides|none, color, volume}
-  hat               {type: fieldcap|officer|beanie|cap|helmet, color, frayed}
+  hat               {type: fieldcap|officer|beanie|cap|helmet|hardhat, color, frayed}
   extras            ["glasses", "headband", "backpack", "lifepack"]
   face              {stubble, age, nose, blush, eye_highlight}
 """
@@ -19,6 +19,19 @@ Felder (alle optional ausser name/torso):
 OLIVE, OLIVE_OLD = "8a8a4a", "7d7a48"
 
 SPECS = {
+    # ---------- Wolkenkratzer (Technikgeschosse) ----------
+    "du": {
+        "name": "Du (tuerkiser Hoodie)", "shoulderW": 0.16,
+        "torso": {"color": "17b8b0", "details": [{"type": "hood", "color": "12a39c"}]},
+        "shoes": "2a2a33", "hair": {"style": "short", "color": "3a2a20"}, "face": {"nose": True},
+    },
+    "inspector": {
+        "name": "Bauprüfer", "shoulderW": 0.17, "height": 1.74,
+        "torso": {"color": "7d828c", "details": [{"type": "panel", "color": "f2f0ea", "width": 0.3, "y0": 0.6},
+                                                 {"type": "tie", "color": "d8262c", "length": 0.62},
+                                                 {"type": "buttons", "color": "4a4e56", "y0": 0.14, "y1": 0.44}]},
+        "shoes": "2a2420", "hat": {"type": "hardhat", "color": "f5c518"}, "face": {"nose": True, "age": 1},
+    },
     # ---------- Hiroo Onoda ----------
     "onoda": {
         "name": "Leutnant Onoda (1944)", "shoulderW": 0.17,
