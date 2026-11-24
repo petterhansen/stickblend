@@ -1,18 +1,30 @@
 {
   "voice": "Charon",
-  "tempo": 1.06,
+  "tempo": 1.08,
   "model": "gemini-2.5-flash-preview-tts",
   "language": "en",
-  "style": "",
+  "style": "Crisp, high-energy storyteller: punchy hook, curious mid-section, dramatic pause before the twist.",
   "initial_prompt": "",
   "lines": [
     {
       "id": "hook",
-      "text": "Replace this with your opening hook line."
+      "text": "Replace with a 0-3s result-first or contradiction hook that starts mid-action."
     },
     {
-      "id": "cta",
-      "text": "Replace this with your closing line."
+      "id": "setup",
+      "text": "Replace with 1-2 tight sentences establishing who, where, and why it matters."
+    },
+    {
+      "id": "escalate",
+      "text": "Replace with the complication—ideally paired with a 1st-person POV switch."
+    },
+    {
+      "id": "twist",
+      "text": "Replace with the surprising reveal, proof, or irony."
+    },
+    {
+      "id": "loop",
+      "text": "Replace with a punchy closer that loops back into the opening hook."
     }
   ]
 }
