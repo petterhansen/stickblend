@@ -1,4 +1,4 @@
-"""Faces as stroke primitives for stickblend 2.5D characters.
+"""Gesichter als Strich-Primitive (Port von onoda/src/stick/Face.ts).
 
 Koordinaten: Gesichts-Canvas 512 x 512 (wie three.js), wird in draw.py auf die Kopfkugel gemappt.
 Primitive:
@@ -18,7 +18,7 @@ def ell(x, y, rx, ry, n=18): return [(x + rx * math.cos(2 * math.pi * i / n), y 
 
 def face_prims(mood="neutral", blink=False, mouth=0.0, look=(0, 0), stubble=False, age=0, nose=True, blush=False, tears=False, sweat=False,
                ink="2b1d16", eye_highlight=False, mouth_dark="3a1218", eyes="dark",
-               mustache=False, muttonchops=False, facial_hair_color="5e4c3a"):
+               mustache=False, muttonchops=False, beard=False, goatee=False, freckles=False, scar=False, eyelashes=False, facial_hair_color="5e4c3a"):
     P = []; m = mood; closed = blink or m == "closed"
     lx, ly = look[0] * 14, look[1] * 10
     # Bartschatten + Stoppeln (unter allem anderen)
@@ -35,6 +35,12 @@ def face_prims(mood="neutral", blink=False, mouth=0.0, look=(0, 0), stubble=Fals
         for k in range(age): P.append(("line", q2((200, 140 - k * 12), (256, 132 - k * 12), (312, 140 - k * 12), 8), 4, "6a5a52", False))
     if blush:
         for x, y in ((160, 300), (352, 300)): P.append(("fill", ell(x, y, 30, 16), ("ff6e78", 0.35), 0))
+    if beard:
+        bd = q2((146, 305), (256, 515), (366, 305), 14) + q2((366, 305), (312, 345), (256, 336), 6)[1:] + q2((256, 336), (200, 345), (146, 305), 6)[1:]
+        P.append(("fill", bd, facial_hair_color, 7))
+    if goatee:
+        gt = q2((222, 375), (256, 468), (290, 375), 10) + [(256, 392)]
+        P.append(("fill", gt, facial_hair_color, 6))
     # Augen
     for x, y in ((196, 236), (316, 236)):
         if closed: P.append(("line", q2((x - 22, y + 4), (x, y + 14), (x + 22, y + 4)), 11, ink, False)); continue
@@ -66,6 +72,18 @@ def face_prims(mood="neutral", blink=False, mouth=0.0, look=(0, 0), stubble=Fals
     if tears or m == "cry":
         for x, y in ((178, 270), (334, 270)): P.append(("fill", q2((x, y), (x + 14, y + 40), (x, y + 52), 6) + q2((x, y + 52), (x - 14, y + 40), (x, y), 6)[1:], "7cc6f2", 5))
     if sweat: P.append(("fill", q2((400, 160), (420, 200), (400, 214), 6) + q2((400, 214), (380, 200), (400, 160), 6)[1:], "9fd3f5", 5))
+    if freckles:
+        for sx in (-1, 1):
+            for dx, dy in ((-18, 0), (0, -7), (16, 4)):
+                P.append(("dot", (256 + sx * 100 + dx, 286 + dy), 3.6, "b87a56"))
+    if scar:
+        P.append(("line", [(328, 175), (366, 290)], 7, "a85652", False))
+        for sy in (202, 232, 262):
+            P.append(("line", [(328 + (sy - 175) * 0.33 - 8, sy + 2), (328 + (sy - 175) * 0.33 + 8, sy - 2)], 4, "a85652", False))
+    if eyelashes:
+        for sx, ex in ((-1, 172), (1, 340)):
+            P.append(("line", [(ex, 224), (ex + sx * 18, 210)], 6, ink, False))
+            P.append(("line", [(ex + sx * 4, 234), (ex + sx * 20, 226)], 5, ink, False))
     if muttonchops:
         for side in (-1, 1):
             cx = 256 + side * 136

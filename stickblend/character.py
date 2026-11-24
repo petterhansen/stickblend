@@ -91,6 +91,42 @@ def _torso(ch, spec):
             _obj(ch, "ribbon", geo.box(bmesh.new(), (0.095, 0.035, 0.012), S(0.28, 0.72, 1.03), nrm_rot(0.28), 0.1), mats.flat("c8352f"), ch.E_torso, thick=0.002)
             for idx, (phi, yn) in enumerate(((0.52, 0.54), (0.48, 0.38))):
                 _obj(ch, "star%d" % idx, geo.cyl(bmesh.new(), 0.028, 0.028, 0.012, S(phi, yn, 1.035), nrm_rot(phi).to_matrix() @ Matrix.Rotation(math.pi / 2, 3, "X"), 8), mats.flat("e8d278"), ch.E_torso, thick=0.002)
+        elif t == "tie":
+            c = S(0, 0.90, 1.03)
+            _obj(ch, "tieknot", geo.box(bmesh.new(), (0.036, 0.032, 0.018), c, None, 0.2), mats.flat(col), ch.E_torso, thick=0.002)
+            path = [S(0, 0.88 - 0.54 * k / 6, 1.028) for k in range(7)]
+            _obj(ch, "tiebody", geo.tube(bmesh.new(), path, 0.022, 6), mats.flat(col), ch.E_torso, thick=0.002)
+        elif t == "scarf":
+            pts = [S(a, 0.96, 1.04) for a in (2 * math.pi * k / 24 for k in range(25))]
+            _obj(ch, "scarf", geo.tube(bmesh.new(), pts, 0.034, 8, caps=False), mats.flat(col), ch.E_torso, thick=0.003)
+            tail = [S(0.28, 0.94 - 0.44 * k / 6, 1.06 + 0.01 * k) for k in range(7)]
+            _obj(ch, "scarftail", geo.tube(bmesh.new(), tail, 0.028, 6), mats.flat(col), ch.E_torso, thick=0.0025)
+        elif t == "apron":
+            bm = bmesh.new(); rows = []
+            for j in range(9):
+                yn = 0.04 + 0.78 * j / 8; w = 0.65
+                rows.append([bm.verts.new(S(-w + 2 * w * i / 8, yn, 1.025)) for i in range(9)])
+            for j in range(8):
+                for i in range(8): bm.faces.new([rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]])
+            bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+            _obj(ch, "apron", bm, mats.flat(col, edge=False), ch.E_torso, solid=0.008, thick=0.0025)
+        elif t == "suspenders":
+            for s in (-1, 1):
+                path = [S(s * 0.34, 0.14 + 0.82 * k / 8, 1.02) for k in range(9)]
+                _obj(ch, "susp%d" % s, geo.tube(bmesh.new(), path, 0.012, 6), mats.flat(col), ch.E_torso, thick=0.002)
+        elif t == "cape":
+            bm = bmesh.new(); rows = []
+            for j in range(8):
+                yn = -0.35 + 1.32 * j / 7; w = 0.95 - 0.35 * (j / 7)
+                rows.append([bm.verts.new(S(math.pi - w + 2 * w * i / 8, yn, 1.04 + (1 - j / 7) * 0.18)) for i in range(9)])
+            for j in range(7):
+                for i in range(8): bm.faces.new([rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]])
+            bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+            _obj(ch, "cape", bm, mats.flat(col), ch.E_torso, solid=0.010, thick=0.003)
+        elif t == "skirt":
+            rw = R(0.05) * 1.05
+            bm = geo.lathe(bmesh.new(), [(rw * (1.32 - 0.32 * k / 6), tH * (0.28 * k / 6 - 0.16)) for k in range(7)], 32)
+            _obj(ch, "skirt", bm, mats.flat(col), ch.E_torso, thick=0.004)
         elif t == "panel":  # V-Ausschnitt / Hemd unter Jacke
             a = d.get("width", 0.4); y0 = d.get("y0", 0.5); bm = bmesh.new(); rows = []
             for j in range(9):
@@ -114,9 +150,13 @@ def _torso(ch, spec):
 
 HAIR = {  # Haaransatz-Hoehe (Einheitskugel, y oben): vorne (Stirn), Seite, hinten (Nacken); fringe = Wellen im Pony
     "short": dict(front=0.52, side=0.05, back=-0.38, fringe=0.0),
+    "parted": dict(front=0.42, side=0.02, back=-0.42, fringe=0.06),
     "bowl": dict(front=0.36, side=-0.18, back=-0.5, fringe=0.05),
     "bob": dict(front=0.4, side=-0.6, back=-0.72, fringe=0.0),
     "long": dict(front=0.42, side=-0.62, back=-0.75, fringe=0.03),
+    "ponytail": dict(front=0.46, side=0.02, back=-0.45, fringe=0.02),
+    "bun": dict(front=0.46, side=0.0, back=-0.42, fringe=0.0),
+    "afro": dict(front=0.48, side=0.0, back=-0.48, fringe=0.04),
 }
 def _smooth(e0, e1, x):
     k = max(0.0, min(1.0, (x - e0) / (e1 - e0))); return k * k * (3 - 2 * k)
@@ -137,8 +177,32 @@ def _hair(ch, H):
                          for j, y in enumerate([ytop + (y1 - ytop) * j / NR for j in range(NR + 1)])])
         for i in range(NP):
             for j in range(NR): bm.faces.new([cols[i][j], cols[i + 1][j], cols[i + 1][j + 1], cols[i][j + 1]])
+    elif style == "spiky":
+        bm = geo.uvsphere(bmesh.new(), r * 1.07, (1, 0.85, 1), (0, r * 0.25, -r * 0.05), 32, 18)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.3], context="FACES")
+        for k in range(7):
+            a = -0.9 + 0.3 * k
+            cone = geo.lathe(bmesh.new(), [(r * 0.22, 0), (0.001, r * 0.48)], 10)
+            M = Matrix.Translation((math.sin(a) * r * 0.55, r * 0.82, math.cos(a) * r * 0.25 - r * 0.1)) @ Matrix.Rotation(-a * 0.7, 4, "Z")
+            for v in cone.verts: bm.verts.new(M @ v.co)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        _obj(ch, "hair", bm, mats.flat(col), ch.E_head, thick=0.006, solid=-0.01)
+        return
+    elif style == "mohawk":
+        for k in range(7):
+            a = -0.35 + 0.24 * k
+            _obj(ch, "mohawk%d" % k, geo.box(bmesh.new(), (r * 0.14, r * 0.42, r * 0.22), (0, math.cos(a) * r * 1.08, math.sin(a) * r * 0.95), Matrix.Rotation(a, 3, "X"), 0.3), mats.flat(col), ch.E_head, thick=0.005)
+        return
+    elif style == "curly":
+        for k in range(18):
+            ph = 2 * math.pi * k / 18; th = 0.45 + 0.52 * (k % 3) / 2
+            c = Vector((math.sin(th) * math.sin(ph), math.cos(th), math.sin(th) * math.cos(ph))) * r * 1.02
+            if c.z > r * 0.25 and c.y < r * 0.45: continue
+            _obj(ch, "curl%d" % k, geo.uvsphere(bmesh.new(), r * 0.24 * vol, (1, 1, 1), c, 14, 10), mats.flat(col), ch.E_head, thick=0.0045)
+        return
     else:
         P = HAIR[style]
+        vol = vol * (1.28 if style == "afro" else 1.0)
         def hairline(ph):
             x, z = math.sin(ph), math.cos(ph)
             back = P["side"] + (P["back"] - P["side"]) * _smooth(0.1, -0.9, z)
@@ -162,6 +226,11 @@ def _hair(ch, H):
         prof = [(r * (0.97 - 0.08 * k / 6), -r * (0.3 + 1.5 * k / 6)) for k in range(7)][::-1]
         bm = geo.lathe(bmesh.new(), prof, 28, math.pi * 0.42, math.pi * 1.16)
         _obj(ch, "hairlong", bm, mats.flat(col), ch.E_head, thick=0.0065, solid=-0.014)
+    elif style == "ponytail":
+        tail = [Vector((0, r * (0.15 - 0.25 * k), -r * (0.98 + 0.12 * k))) for k in range(5)]
+        _obj(ch, "hairlong", geo.tube(bmesh.new(), tail, r * 0.18, 12), mats.flat(col), ch.E_head, thick=0.0055)
+    elif style == "bun":
+        _obj(ch, "hairbun", geo.uvsphere(bmesh.new(), r * 0.34, (1, 1, 1), (0, r * 0.55, -r * 0.88), 20, 14), mats.flat(col), ch.E_head, thick=0.0055)
 
 def _hat(ch, Hd):
     t = Hd["type"]; col = Hd.get("color", "7d7a48"); r = ch.pr["headR"]; dk = _dark(col, 0.8)
@@ -206,6 +275,34 @@ def _hat(ch, Hd):
         M = Matrix.Translation((0, r * 0.34, r * 0.8)) @ Matrix.Rotation(0.12, 4, "X") @ Matrix.Diagonal((1.0, 1, 1.0, 1))
         for v in bm.verts: v.co = M @ v.co
         _obj(ch, "capvisor", bm, mats.flat(dk), ch.E_head, solid=r * 0.04)
+    elif t == "tophat":
+        _obj(ch, "tophatbrim", geo.cyl(bmesh.new(), r * 1.38, r * 1.38, r * 0.08, (0, r * 0.62, 0), None, 32), mats.flat(dk), ch.E_head)
+        _obj(ch, "tophatcrown", geo.cyl(bmesh.new(), r * 0.86, r * 0.94, r * 0.95, (0, r * 1.10, 0), None, 32), mats.flat(col), ch.E_head)
+        _obj(ch, "band", geo.cyl(bmesh.new(), r * 0.88, r * 0.89, r * 0.16, (0, r * 0.72, 0), None, 32), mats.flat(Hd.get("band", "8a2424")), ch.E_head, thick=0.003)
+    elif t == "fedora":
+        R = Matrix.Rotation(-0.14, 4, "X"); mt = CM @ R
+        _obj(ch, "fedorabrim", geo.cyl(bmesh.new(), r * 1.42, r * 1.42, r * 0.07, (0, r * 0.56, 0), None, 32), mats.flat(dk), ch.E_head, mtx=mt)
+        _obj(ch, "fedoracrown", geo.cyl(bmesh.new(), r * 0.80, r * 0.96, r * 0.58, (0, r * 0.85, 0), None, 32), mats.flat(col), ch.E_head, mtx=mt)
+        _obj(ch, "band", geo.cyl(bmesh.new(), r * 0.92, r * 0.95, r * 0.14, (0, r * 0.65, 0), None, 32), mats.flat(Hd.get("band", "222026")), ch.E_head, mtx=mt, thick=0.003)
+    elif t == "bowler":
+        _obj(ch, "bowlerbrim", geo.cyl(bmesh.new(), r * 1.32, r * 1.32, r * 0.07, (0, r * 0.56, 0), None, 32), mats.flat(dk), ch.E_head)
+        bm = geo.uvsphere(bmesh.new(), r * 0.96, (1, 0.92, 1), (0, r * 0.58, 0), 32, 20)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.56], context="FACES")
+        _obj(ch, "bowlerdome", bm, mats.flat(col), ch.E_head, solid=-0.01)
+    elif t == "beret":
+        R = Matrix.Rotation(0.18, 4, "Z"); mt = CM @ R
+        _obj(ch, "beret", geo.uvsphere(bmesh.new(), r * 1.15, (1.1, 0.34, 1.1), (0, r * 0.72, -r * 0.05), 32, 16), mats.flat(col), ch.E_head, mtx=mt)
+        _obj(ch, "beretstem", geo.cyl(bmesh.new(), r * 0.04, r * 0.04, r * 0.16, (0, r * 1.08, -r * 0.05), None, 8), mats.flat(dk), ch.E_head, mtx=mt)
+    elif t == "crown":
+        _obj(ch, "crownbase", geo.cyl(bmesh.new(), r * 0.96, r * 0.90, r * 0.24, (0, r * 0.85, 0), None, 24), mats.flat(Hd.get("color", "e0b844")), ch.E_head)
+        for k in range(6):
+            a = 2 * math.pi * k / 6
+            _obj(ch, "crownpt%d" % k, geo.lathe(bmesh.new(), [(r * 0.14, r * 0.95), (0.001, r * 1.25)], 8), mats.flat(Hd.get("color", "e0b844")), ch.E_head, mtx=CM @ Matrix.Translation((math.sin(a) * r * 0.88, 0, math.cos(a) * r * 0.88)))
+    elif t == "pickelhaube":
+        bm = geo.uvsphere(bmesh.new(), r * 1.04, (1, 0.9, 1), (0, r * 0.35, 0), 32, 20)
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().y < r * 0.35], context="FACES")
+        _obj(ch, "helm_dome", bm, mats.flat(col), ch.E_head, solid=-0.01)
+        _obj(ch, "helm_spike", geo.lathe(bmesh.new(), [(r * 0.12, r * 1.15), (0.001, r * 1.62)], 12), mats.flat("d8b84c"), ch.E_head)
 
 def _extras(ch, spec):
     r = ch.pr["headR"]; ex = spec.get("extras", [])
@@ -215,6 +312,10 @@ def _extras(ch, spec):
             ring = [c + q @ Vector((math.cos(a) * r * 0.17, math.sin(a) * r * 0.17, 0)) for a in (2 * math.pi * k / 24 for k in range(25))]
             _obj(ch, "lens%d" % px, geo.tube(bmesh.new(), ring, r * 0.022, 6, caps=False), mats.ink_line(), ch.E_head, hull=False)
         _obj(ch, "bridge", geo.tube(bmesh.new(), [face_pt(r, 240, 232, 1.07), face_pt(r, 256, 226, 1.09), face_pt(r, 272, 232, 1.07)], r * 0.02, 6), mats.ink_line(), ch.E_head, hull=False)
+    if "monocle" in ex:
+        c = face_pt(r, 316, 236, 1.06); n = c.normalized(); q = Vector((0, 0, 1)).rotation_difference(n)
+        ring = [c + q @ Vector((math.cos(a) * r * 0.17, math.sin(a) * r * 0.17, 0)) for a in (2 * math.pi * k / 24 for k in range(25))]
+        _obj(ch, "monocle", geo.tube(bmesh.new(), ring, r * 0.022, 6, caps=False), mats.flat("d8b44c", edge=False), ch.E_head, hull=False)
     if "headband" in ex:
         R = Matrix.Rotation(-0.12, 4, "X")
         bm = geo.tube(bmesh.new(), [R @ Vector((math.sin(a) * r * 1.09, r * 0.5, math.cos(a) * r * 1.09)) for a in (2 * math.pi * k / 40 for k in range(41))], r * 0.085, 10, caps=False)
@@ -354,7 +455,10 @@ def pose_frame(ch, frame, rigw, mood="neutral", blink=False, mouth=0.0, look=(0,
         new = True
         _face_variant(ch, key, facemod.face_prims(mood, blink, round(mouth * 4) / 4, look, F.get("stubble", False), F.get("age", 0), F.get("nose", True),
                                                    F.get("blush", False), eye_highlight=F.get("eye_highlight", False), ink=mats.STYLE["ink"], eyes=F.get("eyes", "dark"),
-                                                   mustache=F.get("mustache", False), muttonchops=F.get("muttonchops", False), facial_hair_color=F.get("facial_hair_color", "5e4c3a")))
+                                                   mustache=F.get("mustache", False), muttonchops=F.get("muttonchops", False),
+                                                   beard=F.get("beard", False), goatee=F.get("goatee", False), freckles=F.get("freckles", False),
+                                                   scar=F.get("scar", False), eyelashes=F.get("eyelashes", False),
+                                                   facial_hair_color=F.get("facial_hair_color", "5e4c3a")))
         if frame > 1: o = ch.faces[key]; o.hide_render = True; o.keyframe_insert("hide_render", frame=1)  # vorher unsichtbar
     for k, o in ch.faces.items():
         o.hide_render = hidden or k != key; o.keyframe_insert("hide_render", frame=frame)  # kein hide_viewport: sonst wertet Blender die Animation nicht aus
