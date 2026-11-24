@@ -1,6 +1,18 @@
 # Stickblend Starter Kit
 
+<p align="center">
+  <img src="docs/showcase.gif" alt="Stickblend 2.5D character customization and animation showcase" width="720" />
+</p>
+
 Create vertical **2.5D stickman story shorts** rendered in **Blender 5.2 EEVEE** (photorealistic CC0 3D worlds with flat 2.5D stickmen casting real shadows) and composited in **Remotion** (Gemini TTS voiceover, Whisper word timings, royalty-free music, CC0 SFX, captions, and SVG overlays).
+
+### Character Customization & Animation
+Mix and match hats (`tophat`, `fedora`, `bowler`, `beret`, `crown`, `pickelhaube`, `cap`, `beanie`), hair (`parted`, `ponytail`, `bun`, `afro`, `curly`, `spiky`, `mohawk`), outfits (`cape`, `apron`, `suspenders`, `tie`, `scarf`, `skirt`, `medals`, `epaulettes`), facial details (`mustache`, `beard`, `goatee`, `freckles`, `scar`, `eyelashes`, `glasses`, `monocle`), and procedural poses (`facepalm`, `present`, `clap`, `hips`, `wave`, `bow`, `whisper`, `crossed`, `kick`, `cheer`, `kneel`, `nervous`, `lean_back`, plus walk/run cycles and automatic blinking).
+
+Re-render the showcase yourself with:
+```powershell
+blender -b --factory-startup -P stickblend/demo_showcase.py
+```
 
 ## Prerequisites
 - **Blender 5.2** (default Windows path: `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`)
