@@ -107,13 +107,15 @@ def main():
             if idx == 4:  # Banker
                 p = rig.poses_at(t, [(0.0, "crossed"), (4.5, "whisper"), (7.5, "cheer")])
                 return dict(rig=rig.to_world(rig.stick_rig(sp, p, t, talk=0.6 if 4.5 < t < 6.8 else 0.0), (x0, 0, -2.5), -0.08), mood="smug", blink=rig.blink_at(t, 4))
-            # Punk: kick then run in a quick circle and cheer!
-            if t < 5.0:
+            # Punk: kick, run toward camera so face/scar/mohawk are clearly visible, then cheer!
+            if t < 5.2:
                 p = rig.poses_at(t, [(0.0, "idle"), (1.5, "kick"), (3.5, "nervous")])
-                return dict(rig=rig.to_world(rig.stick_rig(sp, p, t), (x0, 0, -2.5), -0.15), mood="angry" if t < 3.5 else "determined", blink=rig.blink_at(t, 5))
-            pos, yaw, spd = rig.walk_along(t, [(5.0, x0, -2.5), (6.5, x0 + 0.6, -1.6), (8.0, x0, -2.5)])
-            p = rig.poses_at(t, [(5.0, "idle"), (8.1, "cheer")])
-            return dict(rig=rig.to_world(rig.stick_rig(sp, p, t, run=spd), pos, yaw), mood="laugh" if t > 8.0 else "determined", blink=rig.blink_at(t, 5))
+                return dict(rig=rig.to_world(rig.stick_rig(sp, p, t), (x0, 0, -2.5), -0.22), mood="angry" if t < 3.5 else "determined", blink=rig.blink_at(t, 5))
+            if t < 7.2:
+                pos, yaw, spd = rig.walk_along(t, [(5.2, x0, -2.5), (6.2, x0 - 0.35, -1.75), (7.2, x0, -2.2)])
+                return dict(rig=rig.to_world(rig.stick_rig(sp, rig.POSES["idle"], t, run=spd), pos, yaw), mood="determined", blink=rig.blink_at(t, 5))
+            p = rig.poses_at(t, [(7.2, "idle"), (7.6, "cheer")])
+            return dict(rig=rig.to_world(rig.stick_rig(sp, p, t), (x0, 0, -2.2), -0.20), mood="laugh" if t > 7.6 else "angry", blink=rig.blink_at(t, 5))
         return fn
 
     for i, (nm, sp) in enumerate(specs_list):

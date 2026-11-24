@@ -33,9 +33,10 @@ def lathe(bm, pts, segs=36, phi0=0.0, phil=2 * math.pi):
 def uvsphere(bm, r, scale=(1, 1, 1), center=(0, 0, 0), seg=32, rings=20, rot=None):
     res = bmesh.ops.create_uvsphere(bm, u_segments=seg, v_segments=rings, radius=r)
     for v in res["verts"]:
-        p = Vector((v.co.x * scale[0], v.co.z * scale[1], v.co.y * scale[2]))
+        p = Vector((v.co.x * scale[0], v.co.z * scale[1], -v.co.y * scale[2]))
         if rot: p = rot @ p
         v.co = p + Vector(center)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     return bm
 
 def box(bm, size, center=(0, 0, 0), rot=None, bevel=0.2):
@@ -49,9 +50,9 @@ def box(bm, size, center=(0, 0, 0), rot=None, bevel=0.2):
 
 def cyl(bm, r1, r2, h, center=(0, 0, 0), rot=None, segs=24):
     """Zylinder entlang y (wie three.js cylinderGeometry), geschlossen."""
-    res = bmesh.ops.create_cone(bm, cap_ends=True, segments=segs, radius1=r2, radius2=r1, depth=h)
+    res = bmesh.ops.create_cone(bm, cap_ends=True, segments=segs, radius1=r1, radius2=r2, depth=h)
     for v in res["verts"]:
-        p = Vector((v.co.x, v.co.z, v.co.y))
+        p = Vector((v.co.x, v.co.z, -v.co.y))
         if rot: p = rot @ p
         v.co = p + Vector(center)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)

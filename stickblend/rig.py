@@ -26,7 +26,7 @@ POSES = {
     "shrug": {"handL": (0.36, 1.1, 0.2), "handR": (-0.36, 1.1, 0.2), "headRoll": 10},
     "sit": {"sit": 0.46, "lean": 8},
     "oil": {"crouch": 0.4, "lean": 18, "handL": (0.22, 0.6, 0.36), "handR": (-0.05, 0.62, 0.38), "headPitch": 16},
-    "cheer": {"handL": (0.34, 1.72, 0.14), "handR": (-0.34, 1.72, 0.14), "lean": -5, "headPitch": -10},
+    "cheer": {"handL": (0.36, 1.72, -0.02), "handR": (-0.36, 1.72, -0.02), "lean": -5, "headPitch": -10},
     "facepalm": {"handR": (-0.06, 1.32, 0.30), "handL": (0.24, 0.72, 0.04), "headPitch": 14, "lean": 5},
     "crossed": {"handL": (-0.10, 0.96, 0.28), "handR": (0.10, 0.94, 0.26), "lean": -2},
     "kneel": {"crouch": 0.38, "lean": 10, "handL": (0.14, 0.66, 0.32), "handR": (-0.14, 0.66, 0.32), "headPitch": 10},
@@ -120,7 +120,7 @@ def stick_rig(spec, pose=None, t=0.0, walk=0.0, talk=0.0, phase=0.0, run=0.0):
     run_lean = 14 * run
     tq = Euler(((P.get("lean") or 0) * D + run_lean * D + math.sin(t * 1.1 + phase) * 0.012, (P.get("twist") or 0) * D, (P.get("side") or 0) * D + (math.sin(ph) * 0.04 * w if w else 0)), "ZYX").to_quaternion()  # three "XYZ" = Rx*Ry*Rz
     hipC = Vector((0, hipY, 0)); T = lambda p: tq @ Vector(p) + hipC
-    shL, shR = T((shW, torsoH * 0.86, 0)), T((-shW, torsoH * 0.86, 0))
+    shL, shR = T((shW * 0.86, torsoH * 0.84, 0)), T((-shW * 0.86, torsoH * 0.84, 0))
     neck = T((0, torsoH + headR * 0.82, 0))
     def arm(side, sh, l, target):
         if target:

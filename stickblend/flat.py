@@ -40,8 +40,8 @@ def _smooth(a, b, x):
 # Nie nach Tiefe sortieren: Teile auf gleicher Hoehe (Guertel/Taschen/Schnalle) tauschen sonst von Bild zu Bild die Reihenfolge.
 LAYERS = {"cape": -2, "skirt": 0, "panel": 0, "pack": 0, "bedroll": 1, "lapel": 1, "patch": 1, "pocket": 1, "apron": 2, "apronbelt": 3, "apronpocket": 4, "apronstrap": 4, "placket": 2, "susp": 3, "belt": 3, "tieknot": 4, "tiebody": 4, "button": 4, "buckle": 5, "pouch": 5,
           "ribbon": 5, "star": 5, "strap": 6, "camstrap": 6, "packstrap": 6, "tab": 7, "collar": 7, "ep": 7, "capeclasp": 8, "scarf": 8, "scarftail": 8, "camera": 8, "bow": 8, "lens": 9,
-          "hair": 1, "hairlong": 1, "hairbun": 1, "curl": 2, "mohawk": 2, "flap": 2, "crown": 2, "beanie": 2, "capdome": 2, "tophatcrown": 3, "fedoracrown": 3, "bowlerdome": 3, "beret": 3, "crownbase": 3, "crownpt": 3, "crownjewel": 5, "helm_dome": 3, "helm_spike": 3,
-          "band": 4, "tophatbrim": 4, "fedorabrim": 4, "bowlerbrim": 4, "beretstem": 4, "headband": 4, "visor": 4, "capvisor": 4, "badge": 5, "bridge": 6, "monocle": 6, "helmring": 6, "helmet": 8, "glint": 9}
+          "hair": 1, "hairlong": 1, "hairbun": 1, "curl": 2, "mohawk": 2, "flap": 2, "crown": 2, "beanie": 2, "capdome": 2, "tophatcrown": 3, "fedoracrown": 3, "bowlerdome": 3, "beret": 3, "crownbase": 3, "crownpt": 3, "helm_dome": 3, "helm_spike": 3,
+          "tophatbrim": 4, "fedorabrim": 4, "bowlerbrim": 4, "beretstem": 4, "headband": 4, "visor": 4, "capvisor": 4, "band": 5, "crownjewel": 5, "badge": 5, "bridge": 6, "monocle": 6, "helmring": 6, "helmet": 8, "glint": 9}
 def _base(o): return o.name.split(".")[0]   # Blender haengt ".001" an, wenn der Name schon vergeben ist (Empty "x_torso" vs. Mesh "x_torso")
 def _layer(o, ch):
     key = _base(o)[len(ch.name) + 1:].rstrip("0123456789-")
@@ -100,13 +100,22 @@ def flatten(chars, cam, frames, step=2, start=1, lw_px=LW_PX):
                     else:                    # Torso = stehender Koerper: Richtung von der Hochachse (Hoehe darf nicht mitzaehlen)
                         side = lambda q: ((q - tc) - ax * (q - tc).dot(ax)).dot(n)
                     fr = [p for p in sel if side(M @ p.center) >= 0]; bk = [p for p in sel if side(M @ p.center) < 0]
-                    if kind == "headpart":   # Teile, die in 3D hinter der Kopfkugel liegen (Nackenschutz neben dem Gesicht), nach hinten
+                    if kind == "headpart":   # Nur echte Rueckseiten-Polygone, die wirklich hinter der Kopfkugel liegen, nach hinten
                         rH = ch.pr["headR"] * 1.01
                         def hidden_by_head(q):
                             d = q - hc; al = d.dot(n); pp = (d - n * al).length
                             return pp < rH and al < math.sqrt(max(0.0, rH * rH - pp * pp))
-                        hid = [p for p in fr if hidden_by_head(M @ p.center)]
-                        if hid: fr = [p for p in fr if p not in hid]; bk = bk + hid
+                        # Hats/crowns: front hemisphere (al >= 0) always stays in front of head; only back polygons occluded by head go to headpart_back
+                        is_hat = _layer(o, ch) >= 3
+                        if is_hat:
+                            def hat_behind(q):
+                                d = q - hc; al = d.dot(n); pp = (d - n * al).length
+                                return al < 0.0 and pp < rH
+                            bk = [p for p in sel if hat_behind(M @ p.center)]
+                            fr = [p for p in sel if not hat_behind(M @ p.center)]
+                        else:
+                            hid = [p for p in fr if hidden_by_head(M @ p.center)]
+                            if hid: fr = [p for p in fr if p not in hid]; bk = bk + hid
                     groups = [g for g in ((kind, fr), (kind + "_back", bk)) if g[1]]
                 for gk, polys in groups:
                     fills = {}; ecount = {}
@@ -121,27 +130,47 @@ def flatten(chars, cam, frames, step=2, start=1, lw_px=LW_PX):
                         for a_, b_ in zip(vs, vs[1:] + vs[:1]): kk = (min(a_, b_), max(a_, b_)); ecount[kk] = ecount.get(kk, 0) + 1
                     depth = sum(P[i][2] for p in polys for i in p.vertices) / sum(len(p.vertices) for p in polys)
                     bound = [(P[a_], P[b_]) for (a_, b_), c in ecount.items() if c == 1] if gk not in ("face", "stick", "armstick") else []
-                    parts.append(dict(kind=gk, depth=depth, fills=fills, bound=bound, layer=_layer(o, ch)))
+                    parts.append(dict(kind=gk, depth=depth, fills=fills, bound=bound, layer=_layer(o, ch), name=o.name))
                     if gk in ("head", "torso"): base[gk] = depth
                 eo.to_mesh_clear()
+            # Pruefe pro Seite (armL/armR), ob die Hand direkt vor dem Gesicht liegt (z. B. facepalm, whisper)
+            rH_face = ch.pr["headR"]
+            face_arms = set()
+            for side_n in ("armL", "armR"):
+                if side_n in ch.joints:
+                    hpos = ch.joints[side_n][3][2].matrix_world.translation
+                    dh = hpos - hc
+                    if dh.dot(n) > rH_face * 0.35 and abs(dh.dot(R)) < rH_face * 0.75 and (-rH_face * 1.15 < dh.dot(U) < rH_face * 0.72):
+                        face_arms.add(side_n)
             # feste Ebenen relativ zum Traeger: Gesicht auf Kopf, Kopfteile davor/dahinter, Torso-Details davor/dahinter
             hd, td = base.get("head"), base.get("torso")
             for p in parts:
                 if hd is not None:
                     if p["kind"] == "face": p["depth"] = hd + 0.002
                     elif p["kind"] == "headpart": p["depth"] = hd + 0.004 + p["layer"] * 6e-4
-                    elif p["kind"] == "headpart_back": p["depth"] = hd - 0.004 - p["layer"] * 6e-4
+                    elif p["kind"] == "headpart_back": p["depth"] = hd - 0.012 + p["layer"] * 6e-4
                 if td is not None:
                     if p["kind"] == "torsopart": p["depth"] = td + 0.003 + p["layer"] * 6e-4
-                    elif p["kind"] == "torsopart_back": p["depth"] = td - 0.003 - p["layer"] * 6e-4
-            # Kopf liegt immer ueber dem Torso (wie gezeichnet: der Kopfkreis ueberdeckt Kragen/Schultern)
+                    elif p["kind"] == "torsopart_back": p["depth"] = td - 0.014 + p["layer"] * 6e-4
+            # Kopf liegt immer ueber dem Torso und ueber normalen Armen (Platz fuer vordere Arme/Haende dazwischen)
             tgrp = [p["depth"] for p in parts if p["kind"] in ("torso", "torsopart")]
-            if hd is not None and tgrp and hd <= max(tgrp) + 0.003:
-                dlt = max(tgrp) + 0.004 - hd
+            if hd is not None and tgrp and hd <= max(tgrp) + 0.026:
+                dlt = max(tgrp) + 0.028 - hd
                 for p in parts:
-                    if p["kind"] in ("head", "face", "headpart"): p["depth"] += dlt
-            for p in parts:   # Haende liegen immer vor dem, was sie halten (Gewehr, Tasse ...)
-                if p["kind"] in ("hand", "armstick"): p["depth"] += HAND_FRONT
+                    if p["kind"] in ("head", "face", "headpart", "headpart_back"): p["depth"] += dlt
+                hd += dlt
+            # Arme und Haende: vordere Arme vor Torso aber hinter Kopf (ausser Hand direkt vor dem Gesicht); Haende IMMER vor Armstrich
+            t_top = max(tgrp) if tgrp else (td or 0.0)
+            for p in parts:
+                if p["kind"] in ("armstick", "hand"):
+                    side_n = "armL" if "_armL_" in p["name"] else ("armR" if "_armR_" in p["name"] else "")
+                    is_hand = p["kind"] == "hand"
+                    if side_n in face_arms and hd is not None:
+                        p["depth"] = hd + (0.026 if is_hand else 0.020)
+                    elif td is not None and p["depth"] >= td - 0.03:
+                        p["depth"] = t_top + (0.012 if is_hand else 0.007)
+                    else:
+                        if is_hand: p["depth"] += 0.008
             parts.sort(key=lambda p: p["depth"])
             verts, faces, fmat, fshade, mlist = [], [], [], [], []
             def mid(k, shaded=True):
