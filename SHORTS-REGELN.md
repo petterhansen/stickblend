@@ -61,6 +61,7 @@ YouTube Shorts und Instagram Reels verdecken unten und oben deutlich mehr Fläch
 - **Sprachverständlichkeit:** Stimme dominiert (Loudness Range **LRA 5–10 LU**); Musik **15–20 dB** darunter, SFX klar hörbar (Klick, Klopfen, Stempel …).
 - Musik-Drops und SFX-Akzente an den Wendepunkten der Story (Enthüllung, Pointe, Reveal).
 - Pausen nur an echten Satzgrenzen, maximal ca. 0,5–0,6 s, nie mitten im Wort oder Satz (`voice_gemini.py` setzt Pausen in echte Stille und kürzt Lücken über 0,5 s).
+- **Stimme ohne Roboter-/Metallklang:** Modell `gemini-3.8-flash-tts` (die alte `2.5-flash-preview` klingt metallisch) und **Tempo 1,0**: Die Rohaufnahme bleibt unverändert, nur lange Pausen werden gekürzt. Jede Zeitdehnung (`atempo`, auch Rubberband) klingt nach Roboter; ist der Text zu lang, wird er gekürzt, nicht beschleunigt. Stil steht als Regieanweisung getrennt vom Transkript, sonst liest das Modell ihn vor; nach dem Erzeugen per Transkript prüfen. Leise Schlussworte (z. B. „doch …“) gezielt anheben.
 - **Lautheit prüfen:** `ffmpeg -i final.mp4 -af ebur128=peak=true -f null -` (Integrated ≈ −14 LUFS, True Peak ≤ −1,0 dBTP) und einmal komplett auf Handy-Lautsprechern anhören.
 
 ## 7. Inhalt und Logik

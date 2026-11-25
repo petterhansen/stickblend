@@ -1,7 +1,7 @@
 {
   "voice": "Charon",
-  "tempo": 1.08,
-  "model": "gemini-2.5-flash-preview-tts",
+  "tempo": 1.0,
+  "model": "gemini-3.8-flash-tts",
   "language": "en",
   "style": "Speak loud, clear and full-voiced - never whisper or breathe the words. Emotional, gripping storyteller addressing the viewer directly in present tense: urgent alarmed hook, tension while things escalate, confident switch at the twist, playful open ending that loops.",
   "initial_prompt": "",

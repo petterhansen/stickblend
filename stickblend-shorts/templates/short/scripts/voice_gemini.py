@@ -133,7 +133,10 @@ def main() -> None:
 
     full_text = " ".join(line["text"] for line in cfg["lines"])
     style = cfg.get("style", "").strip()
-    prompt_text = f"{style}: {full_text}" if style else full_text
+    # Neuere TTS-Modelle lesen eine vorangestellte Stilanweisung sonst mit vor -> Regie und Transkript trennen
+    prompt_text = (f"### DIRECTOR'S NOTES\n{style}\n\n"
+                   "Read ONLY the transcript below, word for word. Do not read the director's notes aloud.\n\n"
+                   f"#### TRANSCRIPT\n{full_text}") if style else full_text
 
     if not args.skip_tts:
         api_key = get_api_key()
@@ -148,7 +151,7 @@ def main() -> None:
                 },
             },
         }
-        model = cfg.get("model", "gemini-2.5-flash-preview-tts")
+        model = cfg.get("model", "gemini-3.8-flash-tts")
         req = urllib.request.Request(
             f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
             data=json.dumps(body).encode("utf-8"),
@@ -168,6 +171,10 @@ def main() -> None:
                     continue
                 sys.exit(f"TTS error {e.code}: {msg[:400]}")
 
+        if "content" not in data["candidates"][0]:   # sporadisch kein Audio (finishReason OTHER): einmal neu anfragen
+            print("No audio:", data["candidates"][0].get("finishReason"), "- retrying")
+            with urllib.request.urlopen(req, timeout=300) as resp:
+                data = json.loads(resp.read())
         part = data["candidates"][0]["content"]["parts"][0]["inlineData"]
         raw_bytes = base64.b64decode(part["data"])
         if "wav" in part["mimeType"]:
@@ -191,11 +198,17 @@ def main() -> None:
             check=True,
         )
 
+    # Tempo: am besten 1.0 (Rohaufnahme unveraendert, kein Roboterklang). Zeitdehnung nur minimal per Rubberband.
     tempo = float(cfg.get("tempo", 1.0))
-    subprocess.run(
-        ["ffmpeg", "-y", "-v", "error", "-i", str(raw_wav), "-af", f"atempo={tempo}", str(wav)],
-        check=True,
-    )
+    if abs(tempo - 1.0) < 1e-3:
+        import shutil
+        shutil.copyfile(raw_wav, wav)
+    else:
+        subprocess.run(
+            ["ffmpeg", "-y", "-v", "error", "-i", str(raw_wav), "-af",
+             f"rubberband=tempo={tempo}:pitchq=quality:formant=preserved:transients=smooth:window=long", str(wav)],
+            check=True,
+        )
 
     print(f"Long silences trimmed: {trim_long_silences(wav):.2f}s")
 

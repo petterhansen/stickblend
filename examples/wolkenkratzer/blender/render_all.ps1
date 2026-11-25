@@ -21,10 +21,9 @@ $ErrorActionPreference = "Stop"
 $Proj = Split-Path -Parent $PSScriptRoot
 $RunPy = Join-Path $PSScriptRoot "run.py"
 $BlDir = Join-Path $Proj "out\bl"; New-Item -ItemType Directory -Force -Path $BlDir | Out-Null
-if (-not $Sets -or $Sets.Count -eq 0) {
-  $line = (& $Blender -b --factory-startup -P $RunPy -- --list 2>&1 | Select-String "^SETS ").Line
-  $Sets = $line.Substring(5).Split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-}
+$line = (& $Blender -b --factory-startup -P $RunPy -- --list 2>&1 | Select-String "^SETS ").Line
+$AllSets = $line.Substring(5).Split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+if (-not $Sets -or $Sets.Count -eq 0) { $Sets = $AllSets }
 # Fingerabdruck
 $files = @(Get-ChildItem (Join-Path $Proj "src\timeline*.json")) + @(Get-ChildItem (Join-Path $PSScriptRoot "*.py"))
 $bytes = [System.Collections.Generic.List[byte]]::new()
@@ -60,7 +59,7 @@ while ($queue.Count -gt 0 -or $active.Count -gt 0) {
 }
 # Alle Sets in globaler Reihenfolge zu einem Clip
 $all = Join-Path $BlDir "all"; if (Test-Path $all) { Remove-Item $all -Recurse -Force }; New-Item -ItemType Directory $all | Out-Null
-foreach ($s in $Sets) { Copy-Item (Join-Path $BlDir "$s\f*.png") $all }
+foreach ($s in $AllSets) { Copy-Item (Join-Path $BlDir "$s\f*.png") $all -ErrorAction SilentlyContinue }   # immer ALLE Sets, auch wenn nur -Sets C neu gerendert wurde
 $outv = if ($Preset -eq "preview") { Join-Path $Proj "out\preview.mp4" } else { Join-Path $Proj "public\bl\onetake.mp4" }
 New-Item -ItemType Directory -Force -Path (Split-Path $outv) | Out-Null
 $first = (Get-ChildItem $all -Filter "f*.png" | Sort-Object Name | Select-Object -First 1).BaseName.Substring(1)

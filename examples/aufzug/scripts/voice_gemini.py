@@ -12,8 +12,12 @@ RAW = ROOT / "public" / "audio" / "voice.raw.wav"
 WAV.parent.mkdir(parents=True, exist_ok=True)
 full = " ".join(l["text"] for l in cfg["lines"])
 
+# Neuere TTS-Modelle lesen eine vorangestellte Stilanweisung sonst mit vor -> Regie und Transkript trennen
+PROMPT = (f"### DIRECTOR'S NOTES\n{cfg['style']}\n\n"
+          "Read ONLY the transcript below, word for word. Do not read the director's notes aloud.\n\n"
+          f"#### TRANSCRIPT\n{full}")
 if "--skip-tts" not in sys.argv:
-    body = {"contents": [{"parts": [{"text": f"{cfg['style']}: {full}"}]}],
+    body = {"contents": [{"parts": [{"text": PROMPT}]}],
             "generationConfig": {"responseModalities": ["AUDIO"],
                                  "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": cfg["voice"]}}}}}
     req = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{cfg['model']}:generateContent",
@@ -28,6 +32,9 @@ if "--skip-tts" not in sys.argv:
             if e.code in (429, 400) and attempt < 3 and "PerDay" not in msg:
                 print(f"TTS {e.code}, neuer Versuch in 65 s"); time.sleep(65); continue
             sys.exit(f"TTS-Fehler {e.code}: {msg[:400]}")
+    if "content" not in d["candidates"][0]:   # sporadisch kein Audio (finishReason OTHER): einmal neu anfragen
+        print("kein Audio:", d["candidates"][0].get("finishReason"), "- neuer Versuch")
+        with urllib.request.urlopen(req, timeout=300) as r: d = json.loads(r.read())
     part = d["candidates"][0]["content"]["parts"][0]["inlineData"]
     raw = base64.b64decode(part["data"])
     if "wav" in part["mimeType"]:
@@ -39,7 +46,13 @@ if "--skip-tts" not in sys.argv:
                     "silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,loudnorm=I=-14:TP=-1.5",
                     "-ar", "44100", str(RAW)], check=True)
 # Tempo anheben (Tonhoehe bleibt)
-subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(RAW), "-af", f"atempo={cfg.get('tempo', 1.0)}", str(WAV)], check=True)
+# Tempo: am besten 1.0 (Rohaufnahme unveraendert, kein Roboterklang). Zeitdehnung nur minimal per Rubberband.
+_tempo = float(cfg.get("tempo", 1.0))
+if abs(_tempo - 1.0) < 1e-3:
+    import shutil; shutil.copyfile(RAW, WAV)
+else:
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(RAW), "-af",
+                    f"rubberband=tempo={_tempo}:pitchq=quality:formant=preserved:transients=smooth:window=long", str(WAV)], check=True)
 
 # ---- lange natuerliche Pausen kuerzen (Gemini haengt manchmal ~1 s Stille mitten in Saetze)
 import numpy as np, wave

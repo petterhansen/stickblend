@@ -1,7 +1,7 @@
 {
  "voice": "Fenrir",
- "tempo": 1.25,
- "model": "gemini-2.5-flash-preview-tts",
+ "tempo": 1.0,
+ "model": "gemini-3.8-flash-tts",
  "style": "Sprich laut, klar und kraftvoll mit voller Stimme, niemals flüstern oder hauchen. Voller Emotion, direkt an den Zuhörer gerichtet, im Präsens: dringlicher Hook, Spannung beim Eskalieren, selbstbewusster Umschwung beim Twist, offenes Ende, das in den Anfang zurückführt.",
  "initial_prompt": "Eigennamen und Fachbegriffe hier, damit Whisper sie richtig erkennt.",
  "pauses": [

@@ -1,7 +1,7 @@
 {
  "voice": "Charon",
- "tempo": 1.3,
- "model": "gemini-2.5-flash-preview-tts",
+ "tempo": 1.0,
+ "model": "gemini-3.8-flash-tts",
  "style": "Sprich wie ein packender Doku-Erzähler mit hörbarer Dramaturgie: Spannung aufbauen, Tempo und Tonhöhe deutlich variieren, Schlüsselwörter betonen (fünfzehn Stockwerke, stockdunkle Höhle, pure Luft, genial, Nichts), vor Pointen kurz innehalten, mit trocken-ironischem Unterton. Den Satz 'Technikraum? Sieht gut aus.' gelangweilt und beiläufig, wie ein anderer Sprecher",
  "initial_prompt": "Wolkenkratzer, New York, Technikgeschosse, Bauprüfer, Besenkammer, sechsundvierzig, fünfzig-Millionen-Dollar-Blick.",
  "pauses": [
