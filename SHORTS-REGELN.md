@@ -50,6 +50,11 @@ YouTube Shorts und Instagram Reels verdecken unten und oben deutlich mehr Fläch
 - Keine Trennung von Zusammengehörigem („NEW | YORK“, „1 | MILLION“). Kurze Satzenden an die vorige Gruppe hängen.
 - Weiß, fette geometrische Sans, dicke schwarze Kontur, nur in der Untertitel-Box (Abschnitt 1 — bei Multi-Plattform-Upload idealerweise im oberen Bereich der Box `y ≈ 1050–1220`).
 
+
+### Zähler und Bauchbinden
+- **Zähler:** kein Kasten, kein Rahmen. Dieselbe fette Schrift wie die Untertitel: oben klein weiß (Label), darunter groß in Rot/Weiß (Wert), nur schwarze Kontur + harter Schlagschatten.
+- **Doku-Bauchbinden** (Datum, Ort, Person): scharfkantiger gelber Vollton-Balken mit schwarzer Schrift, darunter leicht versetzt ein weißer Balken. Eigener Look, nie wie der Zähler (Vorlage: `LowerThird` in `templates/onetake/src/Short.tsx`).
+
 ## 6. Ton und Lautheit (LUFS)
 - **Ziel-Lautheit:** Finalen Mix auf **−14 LUFS integriert** (Arbeitsbereich **−16 bis −14 LUFS**) mastern. YouTube und TikTok normalisieren automatisch auf ca. −14 LUFS — zu laute Mixe werden heruntergeregelt, zu leise klingen im Feed schwach.
 - **True Peak:** Strikt **≤ −1,0 dBTP**, damit beim mobilen Re-Encoding (AAC/Opus) kein digitales Clipping entsteht.

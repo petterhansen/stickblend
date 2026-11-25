@@ -59,12 +59,33 @@ const Caption: React.FC<{ t: number }> = ({ t }) => {
 // ---- Zaehler oben links (ab 0,0 s: erzeugt Druck). Position: unter der Notch-Hoehe, links der Mitte.
 const hudAt = (t: number): { label: string; value: string; color: string } | null =>
   t < T_B ? { label: "NOCH", value: `${Math.max(0, T_B - t).toFixed(1).replace(".", ",")} s`, color: "#ff3b30" } : null;
+// Stil: kein Kasten, keine Flaeche -- dieselbe fette Schrift wie die Untertitel, nur schwarze Kontur + harter Schlagschatten.
+const ink = (px: number) => ({ WebkitTextStroke: `${px}px #000`, paintOrder: "stroke fill" as const, textShadow: `${px * 0.7}px ${px * 0.7}px 0 #000` });
 const Hud: React.FC<{ t: number }> = ({ t }) => {
   const h = hudAt(t); if (!h) return null;
   return (
-    <div style={{ position: "absolute", left: 60, top: 232, background: "rgba(10,14,28,0.72)", borderRadius: 22, padding: "14px 26px 16px", borderLeft: `10px solid ${h.color}`, fontFamily }}>
-      <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: 2, color: "#e8ecf4" }}>{h.label}</div>
-      <div style={{ fontSize: 84, fontWeight: 900, color: h.color, lineHeight: 1.0, fontVariantNumeric: "tabular-nums" }}>{h.value}</div>
+    <div style={{ position: "absolute", left: 66, top: 236, fontFamily, fontWeight: 900, lineHeight: 1 }}>
+      <div style={{ fontSize: 36, letterSpacing: 3, color: "#fff", ...ink(9) }}>{h.label}</div>
+      <div style={{ fontSize: 132, color: h.color, marginTop: 4, fontVariantNumeric: "tabular-nums", letterSpacing: -1, ...ink(18) }}>{h.value}</div>
+    </div>
+  );
+};
+
+// ---- Doku-Bauchbinde (Datum/Ort/Person): scharfkantiger gelber Balken + weisser Balken darunter, leicht versetzt.
+// Bewusst anders als der Zaehler, damit es nicht nach UI/KI-Badge aussieht. Nie gleichzeitig mit dem Zaehler zeigen (gleiche Ecke).
+const ss = (k: number) => { const x = clamp(k, 0, 1); return x * x * (3 - 2 * x); };
+const LOWER: { a: string; b: string; t0: number; t1: number }[] = [
+  { a: "RAUM 2", b: "HINTER DER TÜR", t0: T_B + 0.2, t1: END_T - 0.3 },   // Beispiel: eigene Eintraege an Woerter binden
+];
+const LowerThird: React.FC<{ t: number }> = ({ t }) => {
+  const c = LOWER.find((x) => t >= x.t0 && t < x.t1); if (!c) return null;
+  const wipe = (d: number) => ss((t - c.t0 - d) / 0.22) * ss((c.t1 - t) / 0.15);   // von links herein, am Ende schnell raus
+  const bar = { position: "relative" as const, display: "inline-block", fontFamily, fontWeight: 900, lineHeight: 1, boxShadow: "8px 8px 0 rgba(0,0,0,0.85)" };
+  return (
+    <div style={{ position: "absolute", left: 62, top: 250 }}>
+      <div style={{ ...bar, background: "#ffd60a", color: "#000", fontSize: 72, letterSpacing: 1, padding: "16px 26px 14px", clipPath: `inset(-20px ${100 - 100 * wipe(0)}% -20px -20px)` }}>{c.a}</div>
+      <div style={{ height: 0 }} />
+      <div style={{ ...bar, left: 46, marginTop: -4, background: "#fff", color: "#000", fontSize: 38, fontWeight: 800, letterSpacing: 4, padding: "12px 22px 11px", clipPath: `inset(-20px ${100 - 100 * wipe(0.12)}% -20px -20px)` }}>{c.b}</div>
     </div>
   );
 };
@@ -98,6 +119,7 @@ export const Short: React.FC = () => {
         </svg>
         {flash > 0 && <AbsoluteFill style={{ background: "#fff", opacity: flash }} />}
         <Hud t={t} />
+        <LowerThird t={t} />
         <Caption t={t} />
       </AbsoluteFill>
       <Audio src={staticFile("audio/voice.wav")} />

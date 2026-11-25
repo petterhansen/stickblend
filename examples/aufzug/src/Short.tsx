@@ -104,35 +104,39 @@ const hudAt = (t: number): Hud => {
   if (t >= K_STURZ - 0.1 && t < T_LAND + 0.4) return { label: "STOCKWERK", value: `${clamp(Math.round(czH(t) / 3.6) + 1, 1, 80)}`, color: "#ff3b30" };
   return null;
 };
+// Zaehler ohne Kasten: dieselbe Schrift wie die Untertitel, nur Kontur + harter Schlagschatten
+const ink = (px: number) => ({ WebkitTextStroke: `${px}px #000`, paintOrder: "stroke fill" as const, textShadow: `${px * 0.7}px ${px * 0.7}px 0 #000` });
 const HudBox: React.FC<{ t: number }> = ({ t }) => {
   const h = hudAt(t); if (!h) return null;
   // kurzer Pop, wenn sich das Label aendert
   const prevLabel = hudAt(t - 0.12)?.label; const pop = prevLabel !== h.label ? 1.12 : 1.0;
   const blinkFz = t >= T_FZ && t < T_RW0 && Math.floor(t * 4) % 2 === 1 ? 0.35 : 1;
   return (
-    <div style={{ position: "absolute", left: 60, top: 232, transform: `scale(${pop})`, transformOrigin: "left top", opacity: blinkFz,
-      background: "rgba(10,14,28,0.72)", borderRadius: 22, padding: "14px 26px 16px", borderLeft: `10px solid ${h.color}`, fontFamily }}>
-      <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: 2, color: "#e8ecf4" }}>{h.label}</div>
-      {h.strike && <div style={{ fontSize: 40, fontWeight: 900, color: "#9aa3b5", textDecoration: "line-through", lineHeight: 1 }}>{h.strike} km/h</div>}
-      <div style={{ fontSize: 84, fontWeight: 900, color: h.color, lineHeight: 1.0, fontVariantNumeric: "tabular-nums" }}>{h.value}</div>
+    <div style={{ position: "absolute", left: 66, top: 236, transform: `scale(${pop})`, transformOrigin: "left top", opacity: blinkFz, fontFamily, fontWeight: 900, lineHeight: 1 }}>
+      <div style={{ fontSize: 36, letterSpacing: 3, color: "#ffffff", ...ink(9) }}>{h.label}</div>
+      {h.strike && <div style={{ position: "relative", display: "inline-block", fontSize: 58, color: "#c8ccd6", marginTop: 10, ...ink(8) }}>{h.strike} km/h
+        <div style={{ position: "absolute", left: -6, right: -6, top: "46%", height: 9, background: "#ff3b30", border: "3px solid #000", transform: "rotate(-4deg)" }} /></div>}
+      <div style={{ fontSize: 132, color: h.color, marginTop: 4, fontVariantNumeric: "tabular-nums", letterSpacing: -1, ...ink(18) }}>{h.value}</div>
     </div>
   );
 };
 
-// ---- Karten (1945 / Betty)
+// ---- Doku-Bauchbinden (1945 / Betty): scharfkantige Vollton-Balken, leicht versetzt
 const Card: React.FC<{ t: number }> = ({ t }) => {
   const k1945 = wt("1945");
-  let c: { a: string; b: string; col: string } | null = null; let t0 = 0;
-  if (t >= k1945 - 0.1 && t < K_STURZ - 0.15) { c = { a: "28. JULI 1945", b: "NEW YORK · NEBEL", col: "#ffd60a" }; t0 = k1945 - 0.1; }
-  if (t >= T_LAND + 0.45 && t < T_L - 0.25) { c = { a: "BETTY LOU OLIVER", b: "75 STOCKWERKE · ÜBERLEBT", col: "#34c759" }; t0 = T_LAND + 0.45; }
+  let c: { a: string; b: string } | null = null; let t0 = 0; let t1 = 0;
+  if (t >= k1945 - 0.1 && t < K_STURZ - 0.15) { c = { a: "28. JULI 1945", b: "NEW YORK · NEBEL" }; t0 = k1945 - 0.1; t1 = K_STURZ - 0.15; }
+  if (t >= T_LAND + 0.45 && t < T_L - 0.25) { c = { a: "BETTY LOU OLIVER", b: "75 STOCKWERKE · ÜBERLEBT" }; t0 = T_LAND + 0.45; t1 = T_L - 0.25; }
   if (!c) return null;
-  const k = Math.min(1, (t - t0) / 0.18);
+  // Balken wischen von links herein (2. Balken versetzt), am Ende schnell raus
+  const wipe = (d: number) => ss(clamp((t - t0 - d) / 0.22, 0, 1)) * ss(clamp((t1 - t) / 0.15, 0, 1));
+  const w1 = wipe(0), w2 = wipe(0.12);
+  const bar = { position: "relative" as const, display: "inline-block", fontFamily, fontWeight: 900, lineHeight: 1, boxShadow: "8px 8px 0 rgba(0,0,0,0.85)" };
   return (
-    <div style={{ position: "absolute", left: 60, width: 960, top: 236, textAlign: "center", fontFamily, transform: `translateY(${(1 - k) * -30}px)`, opacity: k }}>
-      <div style={{ display: "inline-block", background: "rgba(10,14,28,0.75)", borderRadius: 24, padding: "16px 34px", borderBottom: `8px solid ${c.col}` }}>
-        <div style={{ fontSize: 66, fontWeight: 900, color: "#fff", letterSpacing: 2 }}>{c.a}</div>
-        <div style={{ fontSize: 36, fontWeight: 700, color: c.col, letterSpacing: 3 }}>{c.b}</div>
-      </div>
+    <div style={{ position: "absolute", left: 62, top: 250 }}>
+      <div style={{ ...bar, background: "#ffd60a", color: "#000", fontSize: 72, letterSpacing: 1, padding: "16px 26px 14px", clipPath: `inset(-20px ${100 - 100 * w1}% -20px -20px)` }}>{c.a}</div>
+      <div style={{ height: 0 }} />
+      <div style={{ ...bar, left: 46, marginTop: -4, background: "#ffffff", color: "#000", fontSize: 38, fontWeight: 800, letterSpacing: 4, padding: "12px 22px 11px", clipPath: `inset(-20px ${100 - 100 * w2}% -20px -20px)` }}>{c.b}</div>
     </div>
   );
 };
