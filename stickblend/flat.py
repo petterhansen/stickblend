@@ -227,3 +227,27 @@ def flatten(chars, cam, frames, step=2, start=1, lw_px=LW_PX, pov=None, pov_hand
             for kf, hide in keys: ob.hide_render = hide; ob.keyframe_insert("hide_render", frame=kf)
     sc.frame_set(start)
     return coll
+
+
+def flat_pt(p, rig_world, ch, cam_pos, extra=0.0):
+    """Weltpunkt `p` (z. B. eine Hand aus dem 3D-Rig) so verschieben, wie `flatten` die Figur abbildet:
+    orthografisch auf die kamerazugewandte Ebene durch die Huefte, dann `flat_bias` (+extra) Richtung Kamera.
+    Damit sitzen gehaltene Requisiten (Becher, Klemmbrett, Stempel) exakt in der 2.5D-Hand statt daneben.
+    rig_world: Rueckgabe von rig.to_world(...); cam_pos: Kameraposition (Blender) im selben Frame."""
+    from .geo import tb
+    a = Vector(tb(tuple(rig_world["hipC"]))); cp = Vector(cam_pos); n = (cp - a).normalized()
+    q = Vector(p) - n * n.dot(Vector(p) - a)
+    b = (getattr(ch, "flat_bias", 0.0) or 0.0) + extra; d = (cp - a).length
+    return cp + (q - cp) * max(0.05, (d - b) / d) if b else q
+
+
+def attach(root, offset_at_frame):
+    """2.5D-Cutouts an ein bewegtes Objekt haengen (fahrende Kabine, Fahrzeug, Plattform).
+    Figuren laufen auf Zweiern (step=2); ohne attach springen sie auf den Zwischenbildern relativ zur
+    bewegten Umgebung. offset_at_frame(f) -> Matrix: Weltmatrix von `root` im Bild f.
+    Billiger als step=1 (flatten kostet ~0.35 s pro geflattetem Bild)."""
+    import re
+    for o in bpy.data.objects:
+        m = re.match(r"flat_.+_(\d{4})$", o.name)
+        if not m or o.parent is not None: continue
+        o.parent = root; o.matrix_parent_inverse = offset_at_frame(int(m.group(1))).inverted()

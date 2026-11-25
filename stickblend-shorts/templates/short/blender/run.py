@@ -8,6 +8,8 @@ Environment overrides:
   PCT=75             Override resolution percentage (75 = 810x1440, 100 = 1080x1920)
   FMT=JPEG           Output format for animation frames: JPEG (fast, q=95) or PNG (compression=0)
   SHADOW_DIST=18     Max shadow-casting distance from origin (cuts distant foliage shadow cost)
+  RESUME=1           (default) skip frames that already exist; flatten only from the first missing frame.
+                     render_all.ps1 deletes stale frames when timeline/shots.py change (stamp file).
   STICKBLEND_ROOT    Path to repo containing stickblend/
 """
 import os
@@ -40,9 +42,20 @@ stills = [int(x) for x in MODE.split(":")[1].split(",")] if MODE.startswith("sti
 fmt = os.environ.get("FMT", "JPEG" if stills is None else "PNG").upper()
 shadow_dist = float(os.environ.get("SHADOW_DIST", "18"))
 
+ext = "jpg" if fmt == "JPEG" else "png"
+resume = stills is None and MODE == "all" and os.environ.get("RESUME", "1") == "1"
+have = {int(p.stem[1:5]) for p in OUT.glob(f"f????.{ext}") if p.stem[1:5].isdigit() and p.stat().st_size > 0} if resume else set()
+
 for fn, f0, f1 in shots.segments(SID):
     if stills is not None and not any(f0 <= s <= f1 for s in stills):
         continue
+    rs = f0   # first frame to (re)render in this segment
+    if resume:
+        miss = [f for f in range(f0, f1 + 1) if f not in have]
+        if not miss:
+            print("SKIP", SID, f0, f1, "already rendered"); continue
+        rs = f0 + ((miss[0] - f0) // 2) * 2   # keep the 2s-rhythm of the cutouts
+        print("RESUME", SID, "from", rs, "missing", len(miss))
     stage.reset()
     shots.CHARS.clear()
     shots.STEP[0] = 2
@@ -53,9 +66,15 @@ for fn, f0, f1 in shots.segments(SID):
                 if f0 <= s_ <= f1:
                     flat.flatten(shots.CHARS, bpy.context.scene.camera, 1, step=1, start=s_)
         else:
-            flat.flatten(shots.CHARS, bpy.context.scene.camera, f1 - f0 + 1, step=shots.STEP[0], start=f0)
+            flat.flatten(shots.CHARS, bpy.context.scene.camera, f1 - rs + 1, step=shots.STEP[0], start=rs)
+        if hasattr(shots, "after_flatten"):   # e.g. flat.attach(...) for cutouts inside moving vehicles
+            shots.after_flatten()
     sc = stage.render_setup(PRESET)
-    sc.frame_start, sc.frame_end = f0, f1
+    sc.frame_start, sc.frame_end = rs, f1
+    sc.render.use_persistent_data = True   # keep scene data between frames (~40 % faster)
+    sc.render.use_overwrite = not resume
+    if PRESET == "preview":                # coarse volumetrics for motion previews
+        sc.eevee.volumetric_tile_size = "16"; sc.eevee.volumetric_samples = 24
     if os.environ.get("SPP"):
         sc.eevee.taa_render_samples = int(os.environ["SPP"])
     if os.environ.get("PCT"):

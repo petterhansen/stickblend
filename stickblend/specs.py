@@ -32,6 +32,12 @@ SPECS = {
                                                  {"type": "buttons", "color": "4a4e56", "y0": 0.14, "y1": 0.44}]},
         "shoes": "2a2420", "hat": {"type": "hardhat", "color": "f5c518"}, "face": {"nose": True, "age": 1},
     },
+    # ---------- Aufzug (Betty Lou Oliver, Liftfuehrerin 1945) ----------
+    "betty": {
+        "name": "Betty (Liftführerin 1945)", "shoulderW": 0.155, "height": 1.66,
+        "torso": {"color": "1f3a8a", "details": [{"type": "collar"}, {"type": "buttons", "color": "f2c14e"}, {"type": "belt", "color": "14245c", "buckle": "f2c14e"}]},
+        "shoes": "2a1a14", "hair": {"style": "bob", "color": "8a4a22"}, "hat": {"type": "cap", "color": "1f3a8a"}, "face": {"nose": True, "blush": True},
+    },
     # ---------- Hiroo Onoda ----------
     "onoda": {
         "name": "Leutnant Onoda (1944)", "shoulderW": 0.17,

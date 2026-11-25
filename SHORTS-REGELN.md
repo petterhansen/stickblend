@@ -26,6 +26,9 @@ YouTube Shorts und Instagram Reels verdecken unten und oben deutlich mehr Fläch
 - **Show, Don't Tell:** Direkt mitten in der Bewegung, mit starkem visuellem Kontrast oder dem zentralen Rätsel-/Ergebnismotiv starten („3-Sekunden-Thumbnail“-Prinzip).
 - Im ersten Satz steckt sofort die Frage, der Konflikt oder der Widerspruch („…fehlen einfach 15 Stockwerke“).
 - Das Thumbnail-Motiv taucht in den ersten 3 s sichtbar auf.
+- **Mitten ins Geschehen:** Frame 1 zeigt die Situation, die schon läuft (Fall, Riss, Knall), keine Einleitung. Du-Form und Präsens, Satz 1 schildert die Lage statt eine Frage zu stellen („Das Seil ist gerissen.“). Auf Frame 1 liegt ein Ton-Treffer.
+- **Zähler im Bild** (Restzeit, Höhe, Tempo) ab 0,0 s erzeugt Druck und gibt den Takt. Er steht in der Safe-Zone und überdeckt nie die Untertitel-Box.
+- **Einzigartiges Konzept:** kein Thema, das große Kanäle schon so gemacht haben, ohne eigenen Dreh.
 
 ## 3. Länge, Tempo und Loop
 - **Sweet Spot:** **21–50 s** (maximal **60 s** für straffes Shorts-Tempo). Jede Sekunde muss visuell oder inhaltlich etwas Neues liefern.
@@ -69,7 +72,7 @@ YouTube Shorts und Instagram Reels verdecken unten und oben deutlich mehr Fläch
 - Kategorie „Bildung“ für Erklär-Shorts, einheitlich pro Reihe.
 
 ## Checkliste vor dem Export
-- [ ] Hook (0–3 s): erstes Bild und erster Satz tragen sofort die Frage/Spannung (kein langsamer Einstieg)
+- [ ] Hook (0–3 s): Frame 1 mitten im Geschehen, Satz 1 schildert die Lage, Ton-Treffer auf Frame 1 (kein langsamer Einstieg)
 - [ ] Länge 21–50 s (max. 60 s), Pattern-Interrupts alle 2–4 s, kein Schwarzbild > 0,5 s, Loop am Ende
 - [ ] Kamera: Kontaktbogen alle 0,5 s ohne Wand-Durchflüge, Ruck-Drehungen oder `flat_bias`-Clipping
 - [ ] `safezone_check.py` angesehen: Untertitel und Kernmotive sicher (Cross-Platform: `y 290–1240` für Kernmotive)

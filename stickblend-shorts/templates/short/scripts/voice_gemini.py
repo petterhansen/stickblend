@@ -42,6 +42,78 @@ def get_api_key() -> str:
     sys.exit("GEMINI_API_KEY not found in environment or .env")
 
 
+# ---- Pausen-Werkzeuge (Gemini haengt manchmal ~1 s Stille mitten in Saetze, Pausen nur in echte Stille setzen)
+def _read_wav(p):
+    import numpy as np, wave
+    with wave.open(str(p)) as w:
+        prm = w.getparams(); x = np.frombuffer(w.readframes(prm.nframes), np.int16).reshape(-1, prm.nchannels)
+    return prm, x
+
+
+def _write_wav(p, prm, y):
+    import wave
+    with wave.open(str(p), "wb") as w:
+        w.setparams(prm); w.writeframes(y.astype("int16").tobytes())
+
+
+def _env_db(x, sr, win=0.02):
+    import numpy as np
+    n = int(sr * win); m = x.astype(np.float32).mean(axis=1); k = len(m) // n
+    return 20 * np.log10(np.sqrt((m[: k * n].reshape(k, n) ** 2).mean(axis=1)) / 32768 + 1e-9), n
+
+
+def trim_long_silences(wav, max_keep=0.4, longer_than=0.5, thr=-40):
+    """Stille > longer_than s (unter thr dB) in der Mitte auf max_keep s kuerzen. Rueckgabe: gekuerzte Sekunden."""
+    import numpy as np
+    prm, x = _read_wav(wav); sr = prm.framerate; db, hop = _env_db(x, sr)
+    quiet = db < thr; keep = np.ones(len(x), bool); i = 0
+    while i < len(quiet):
+        if quiet[i]:
+            j = i
+            while j < len(quiet) and quiet[j]: j += 1
+            dur = (j - i) * hop / sr
+            if dur > longer_than and i > 0 and j < len(quiet):
+                cut = int((dur - max_keep) * sr); a = i * hop + (int((j - i) * hop) - cut) // 2; keep[a: a + cut] = False
+            i = j
+        else:
+            i += 1
+    _write_wav(wav, prm, x[keep]); return (~keep).sum() / sr
+
+
+def insert_pauses(wav, pauses, times, script_words, lines, thr=-40):
+    """pauses: [{"line": id, "after": wortanfang, "sec": 0.4}] -> Gesamtpause nach dem Wort.
+    Sucht im Fenster +-0.35 s die laengste echte Stille und ergaenzt nur die fehlende Dauer (nie mitten im Wort).
+    Gibt verschobene times zurueck."""
+    import numpy as np
+    pz = []
+    for p in pauses:
+        li = [i for i, l in enumerate(lines) if l["id"] == p["line"]][0]
+        ks = [k for k, (l_, w) in enumerate(script_words) if l_ == li and norm(w).startswith(norm(p["after"]))]
+        if not ks: print("Pause: Wort nicht gefunden", p); continue
+        k = ks[0]; c0 = (times[k][1] + times[k + 1][0]) / 2 if k + 1 < len(times) else times[k][1]
+        prm, x = _read_wav(wav); db, hop = _env_db(x, prm.framerate, 0.01)
+        lo, hi = int((c0 - 0.35) * prm.framerate / hop), int((c0 + 0.35) * prm.framerate / hop)
+        q = db[max(0, lo): hi] < thr; best, bl, i = None, 0, 0
+        while i < len(q):
+            if q[i]:
+                j = i
+                while j < len(q) and q[j]: j += 1
+                if j - i > bl: best, bl = (i + j) // 2, j - i
+                i = j
+            else:
+                i += 1
+        if best is None: print("Pause: keine Stille nach", p["after"]); continue
+        add = p["sec"] - bl * hop / prm.framerate
+        if add > 0.03: pz.append(((max(0, lo) + best) * hop / prm.framerate, add))
+    if not pz: return times, 0.0
+    prm, x = _read_wav(wav); out, last = [], 0
+    for cut, sec in sorted(pz):
+        c = int(cut * prm.framerate); out += [x[last:c], np.zeros((int(sec * prm.framerate), prm.nchannels), np.int16)]; last = c
+    out.append(x[last:]); _write_wav(wav, prm, np.concatenate(out))
+    sh = lambda t_: t_ + sum(sec for cut, sec in pz if t_ >= cut)
+    return [(sh(a_), sh(b_)) for a_, b_ in times], sum(s_ for _, s_ in pz)
+
+
 def norm(s: str) -> str:
     return re.sub(r"[^\w]", "", s.lower())
 
@@ -125,6 +197,8 @@ def main() -> None:
         check=True,
     )
 
+    print(f"Long silences trimmed: {trim_long_silences(wav):.2f}s")
+
     from faster_whisper import WhisperModel
 
     m = WhisperModel(args.whisper_model, device="cpu", compute_type="int8")
@@ -163,6 +237,8 @@ def main() -> None:
         step = (e - s) / max(1, len(gap))
         times[i] = (s + j * step, s + (j + 1) * step)
 
+    times, added = insert_pauses(wav, cfg.get("pauses", []), times, script_words, cfg["lines"])
+    total += added
     print(f"Matched {len(known)}/{len(a)} words, duration {total:.2f}s")
 
     lines_out = []

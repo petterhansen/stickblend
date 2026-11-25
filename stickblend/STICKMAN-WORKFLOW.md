@@ -1,5 +1,7 @@
 # Stickman-Workflow in Blender (`stickblend`)
 
+> **Verbindliche Shorts-Regeln** (Safe-Zone, Hook, Tempo, Kamera, Untertitel, Ton, Checkliste): siehe `../SHORTS-REGELN.md`. Safe-Zone-Prüfung: `python stickblend/tools/safezone_check.py <video>`.
+
 So entstehen Strichmännchen für die Shorts: Jede Figur wird aus einem Steckbrief gebaut, mit Posen und Mimik animiert und in Blender (EEVEE) in einer 3D-Welt gerendert.
 Untertitel, Ton und Effekte kommen danach wie bisher aus Remotion.
 
@@ -202,6 +204,17 @@ Alle Presets rendern 1080×1920 in EEVEE (`stage.PRESETS`):
 - Welten in Blender aus wenigen, zusammengefügten Objekten bauen. Vegetation besser instanzieren statt als Einzelobjekte anlegen.
 - 16 Samples reichen für flache Figuren. Mehr Samples braucht nur starke Tiefenschärfe.
 - Länge rechnen: 69 s entsprechen 2070 Bildern. Bei 0,4 s pro Bild sind das etwa 14 min, bei 0,25 s etwa 9 min.
+
+**Render-Tempo bei One-Take-Shorts** (gemessen am Aufzug-Short, 47 s, RTX 3070):
+- `flat.flatten` kostet ~0,35 s pro geflattetem Bild (Python). Figuren daher immer auf Zweiern (`step=2`).
+- Steht die Figur in etwas, das sich bewegt (Aufzugskabine, Fahrzeug), ruckelt sie auf Zweiern relativ zur Umgebung. Lösung: nach dem Flatten `flat.attach(root, f -> root-Weltmatrix im Bild f)`, statt auf `step=1` zu gehen (das verdoppelt die Kosten).
+- Keine Light-Probe, die sich mitbewegt: Sie wird jedes Bild neu aufgenommen (+0,33 s pro Bild).
+- `render.use_persistent_data = True` spart ~40 % (Vorlage `run.py`).
+- Werte, die über Keyframes umschalten (Material-Value, Lichtenergie), **jedes Bild keyen** (`campath.key_every_frame`), sonst interpoliert Bezier über lange Strecken.
+- Rendern ist fortsetzbar: vorhandene Bilder werden übersprungen, veraltete über einen Fingerabdruck (Zeitachse + Szenencode) erkannt. Andere GPU-Last (Spiele, lokale LLMs) verdoppelt die Renderzeit.
+- Vorschau (50 %, 4 spp, grobe Volumen): ~0,22 s pro Bild.
+
+**One-Take-Kameraflug** (`stickblend/campath.py`): ein durchgehender Flug über globale Frames statt Szenen-Schnitten. Set-Grenzen hängen an Wörtern (`wt("aber") - 0.05`), damit eine neue Sprachspur alles automatisch verschiebt. Keys mit `"stop"` markieren, wenn danach Richtung oder Höhe stark wechseln (sonst überschießt die Hermite-Kurve). Requisiten in 2.5D-Händen mit `flat.flat_pt` platzieren.
 
 ---
 

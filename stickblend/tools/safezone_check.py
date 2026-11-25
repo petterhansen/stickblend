@@ -14,7 +14,7 @@ red = np.array(mask)[:, :, 3] > 0
 dur = float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", vid]))
 tmp = pathlib.Path(tempfile.mkdtemp()); frames = []; bad = []
 t = 0.5
-while t < dur:
+while t < dur - 0.15:   # letztes Bild nicht ueberschreiten (sonst liefert ffmpeg nichts)
     p = tmp / f"{t:07.2f}.png"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(t), "-i", vid, "-frames:v", "1", "-vf", "scale=1080:1920", str(p)], check=True)
     im = Image.open(p).convert("RGB"); a = np.array(im).astype(int)

@@ -33,37 +33,63 @@ const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 const relWords = (l: TimelineLine): TimelineWord[] =>
   l.words.map((w) => ({ w: w.w, s: w.s - l.start, e: w.e - l.start }));
 
+// ---- Captions (SHORTS-REGELN.md): 2-4 words per group, punctuation kept, numbers as digits, ẞ in caps,
+// always inside the safe box. Default = cross-platform zone (YouTube Shorts + Reels + TikTok): x 70-860, bottom <= 1240.
+// TikTok-only exports may use the TikTok caption box (yc 1290, bottom <= 1500) via the `captionBox` prop.
+export type CaptionBox = { x0: number; x1: number; yc: number };
+export const CAPTION_BOX_UNIVERSAL: CaptionBox = { x0: 70, x1: 860, yc: 1120 };
+export const CAPTION_BOX_TIKTOK: CaptionBox = { x0: 70, x1: 860, yc: 1290 };
+const up = (s: string) => s.replace(/ß/g, "ẞ").toUpperCase();
+type Grp = { txt: string; s: number; e: number };
+const groupWords = (words: TimelineWord[], numbers: [RegExp, string][]): Grp[] => {
+  const disp = (w: string) => { let x = w.replace(/–/g, "").trim(); for (const [re, d] of numbers) x = x.replace(re, d); return x; };
+  const ws = words.filter((w) => norm(w.w));
+  const out: Grp[] = []; let cur: TimelineWord[] = [];
+  const flush = () => { if (cur.length) out.push({ txt: cur.map((w) => disp(w.w)).join(" "), s: cur[0].s, e: cur[cur.length - 1].e }); cur = []; };
+  ws.forEach((w, i) => {
+    const nx = ws[i + 1]; cur.push(w);
+    const len = cur.map((x) => disp(x.w)).join(" ").length;
+    const clause = /[.,:;!?“"]$/.test(w.w);
+    const gap = nx ? nx.s - w.e > 0.32 : true;
+    const nlen = nx ? len + 1 + disp(nx.w).length : 99;
+    if (!nx || clause || gap || cur.length >= 4 || nlen > 22) flush();
+  });
+  flush();
+  return out;
+};
+const wrapLines = (s: string, max = 13) => {
+  const lines: string[] = []; let l = "";
+  for (const w of s.split(" ")) { if (l && (l + " " + w).length > max) { lines.push(l); l = w; } else l = l ? l + " " + w : w; }
+  if (l) lines.push(l);
+  return lines;
+};
+
 const Caption: React.FC<{
   words: TimelineWord[];
   t: number;
   highlights: string[];
-}> = ({ words, t, highlights }) => {
-  let i = -1;
-  words.forEach((w, k) => {
-    if (t >= w.s - 0.04) i = k;
-  });
-  if (i < 0) return null;
-  const w = words[i];
-  const txt = w.w.replace(/[.!?:]$/g, "");
-  const k = Math.min(1, (t - w.s + 0.04) / 0.1);
-  const hl = highlights.some((h) => norm(w.w).startsWith(h));
-  const size = Math.min(104, 1500 / Math.max(6, txt.length));
+  box?: CaptionBox;
+  numbers?: [RegExp, string][];
+}> = ({ words, t, highlights, box = CAPTION_BOX_UNIVERSAL, numbers = [] }) => {
+  const groups = React.useMemo(() => groupWords(words, numbers), [words, numbers]);
+  let g = -1;
+  groups.forEach((x, k) => { if (t >= x.s - 0.03) g = k; });
+  if (g < 0) return null;
+  const G = groups[g]; const next = groups[g + 1];
+  if (t > G.e + 0.5 && (!next || t < next.s - 0.03)) return null;
+  const k = Math.min(1, (t - G.s + 0.03) / 0.08);
+  const lines = wrapLines(up(G.txt));
+  const longest = Math.max(...lines.map((l) => l.length));
+  const size = Math.min(92, (box.x1 - box.x0) / (0.74 * Math.max(8, longest)));
+  const top = box.yc - size * 0.54 * lines.length;
+  const hl = highlights.some((h) => norm(G.txt).includes(h));
   return (
-    <g transform={`translate(540,1360) scale(${0.92 + 0.08 * k})`} opacity={0.4 + 0.6 * k}>
-      <text
-        textAnchor="middle"
-        fontFamily="system-ui, -apple-system, 'Segoe UI', sans-serif"
-        fontWeight={900}
-        fontSize={size}
-        fill={hl ? "#ffe066" : "#fff"}
-        stroke="#111"
-        strokeWidth={size * 0.17}
-        strokeLinejoin="round"
-        paintOrder="stroke"
-      >
-        {txt}
-      </text>
-    </g>
+    <div style={{ position: "absolute", left: box.x0, width: box.x1 - box.x0, top, textAlign: "center",
+      fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", fontWeight: 900, fontSize: size, color: hl ? "#ffe066" : "#fff",
+      WebkitTextStroke: `${size * 0.16}px #111`, paintOrder: "stroke fill", transform: `scale(${0.92 + 0.08 * k})`,
+      textShadow: "0 6px 0 rgba(0,0,0,0.35)", lineHeight: 1.08 }}>
+      {lines.map((l, i) => <div key={i}>{l}</div>)}
+    </div>
   );
 };
 
@@ -75,6 +101,8 @@ export interface StickblendShortProps {
   sfxGain?: Record<string, number>;
   highlights?: string[];
   showCaptions?: boolean;
+  captionBox?: CaptionBox;               // default CAPTION_BOX_UNIVERSAL (YouTube + Reels + TikTok)
+  captionNumbers?: [RegExp, string][];   // e.g. [[/^fünfzehn$/i, "15"]] -> numbers as digits
   showProgressBar?: boolean;
   musicVolume?: number;
   duckSceneIds?: string[];
@@ -88,6 +116,8 @@ export const StickblendShort: React.FC<StickblendShortProps> = ({
   sfxGain = {},
   highlights = [],
   showCaptions = false,
+  captionBox,
+  captionNumbers,
   showProgressBar = false,
   musicVolume = 0.12,
   duckSceneIds = [],
@@ -116,6 +146,8 @@ export const StickblendShort: React.FC<StickblendShortProps> = ({
               overlay={overlays[line.id]}
               highlights={highlights}
               showCaptions={showCaptions}
+              captionBox={captionBox}
+              captionNumbers={captionNumbers}
             />
           </Sequence>
         );
@@ -174,7 +206,9 @@ const SceneClip: React.FC<{
   overlay?: SceneOverlayFn;
   highlights: string[];
   showCaptions: boolean;
-}> = ({ slug, line, fps, overlay, highlights, showCaptions }) => {
+  captionBox?: CaptionBox;
+  captionNumbers?: [RegExp, string][];
+}> = ({ slug, line, fps, overlay, highlights, showCaptions, captionBox, captionNumbers }) => {
   const f = useCurrentFrame();
   const t = f / fps;
   const words = relWords(line);
@@ -185,6 +219,7 @@ const SceneClip: React.FC<{
       <OffthreadVideo src={staticFile(`shorts/${slug}/bl/${line.id}.mp4`)} muted />
       <AbsoluteFill>
         <svg width={1080} height={1920} viewBox="0 0 1080 1920">
+          {overlay && overlay({ t, dur: line.dur, words })}
           <image
             href={staticFile(`shorts/${slug}/img/grain.png`)}
             x={-((f * 137) % 400)}
@@ -194,10 +229,9 @@ const SceneClip: React.FC<{
             opacity={0.05}
             style={{ mixBlendMode: "overlay" }}
           />
-          {overlay && overlay({ t, dur: line.dur, words })}
-          {showCaptions && <Caption words={words} t={t} highlights={highlights} />}
           <rect width={1080} height={1920} fill="#000" opacity={1 - fin} />
         </svg>
+        {showCaptions && <Caption words={words} t={t} highlights={highlights} box={captionBox} numbers={captionNumbers} />}
       </AbsoluteFill>
     </AbsoluteFill>
   );

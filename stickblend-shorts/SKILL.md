@@ -81,6 +81,9 @@ python <slug>\scripts\voice_gemini.py --skip-tts
 - Every scene id in `timeline.json` must be registered in `segments(sid)` returning `[(build_fn, first_frame, last_frame), ...]`.
 - Use `words(sid)` and `wAt(W, "keyword")` to lock poses, cuts, and camera moves to spoken words.
 - Characters animate on 2s (`step=2`, 15 fps) by default while cameras animate on 1s (30 fps).
+- **One-take shorts** (one continuous camera flight instead of cuts): use `stickblend/campath.py` (`path` with `"stop"` keys, `rel` for moving vehicles, `camera`), bind set boundaries to spoken words, place held props with `flat.flat_pt`, and call `flat.attach(...)` in `after_flatten()` when characters stand inside moving objects (elevator, car). See STICKMAN-WORKFLOW.md §6.
+- **Captions** default to the cross-platform safe box (`CAPTION_BOX_UNIVERSAL`, bottom <= 1240); pass `captionBox={CAPTION_BOX_TIKTOK}` only for TikTok-only exports.
+- **Voice:** if it sounds whispery, make the `style` prompt explicit ("loud, clear, never whisper") and try another voice (e.g. `Fenrir`); add `pauses` only where the audio already has silence.
 
 ### 6. Preview Stills & Visual QA
 ```powershell
@@ -92,7 +95,7 @@ Inspect `<slug>\out\bl\<sid>\still_####.png` before full rendering. Check framin
 ```powershell
 .\<slug>\blender\render_all.ps1 -Slug <slug> -Spp 6 -Pct 75 -Jobs 2
 ```
-Renders scenes in parallel, encodes `H.264 CRF 16` MP4s at 1080×1920, and syncs clips + audio into `remotion\public\shorts\<slug>\`.
+Renders scenes in parallel, encodes `H.264 CRF 16` MP4s at 1080×1920, and syncs clips + audio into `remotion\public\shorts\<slug>\`. Resumable: re-running continues where a crash stopped; `-Clean` forces a full re-render. Logs: `outl\<scene>.log`.
 
 ### 8. Composite & Export in Remotion
 1. Create `remotion\src\videos\<slug>\<Slug>Short.tsx` importing `StickblendShort` from `../../shared/StickblendShort` and the project's `timeline.json`.

@@ -1,6 +1,9 @@
 <#
 .SYNOPSIS
 Render all (or selected) scenes in Blender 5.2 in parallel, encode to MP4, and sync to Remotion public/shorts/<slug>/.
+Resumable: frames that already exist are skipped (run.py RESUME=1). A stamp (hash of timeline.json, blender/*.py,
+preset, SPP, PCT, FMT) per scene detects stale frames; only then are they deleted. -Clean forces a full re-render.
+Each scene logs to out/bl/<scene>.log and is retried once if Blender crashes (e.g. GPU driver reset).
 Usage:
   .\blender\render_all.ps1 -Slug my-short
   .\blender\render_all.ps1 -Slug my-short -Spp 6 -Pct 75 -Jobs 2 -SkipExisting
@@ -14,6 +17,7 @@ param(
   [string]$Fmt = "JPEG",
   [double]$ShadowDist = 18,
   [switch]$SkipExisting,
+  [switch]$Clean,
   [string]$Preset = "final",
   [string]$Blender = "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"
 )
@@ -40,6 +44,22 @@ if ($SkipExisting) {
   }
 }
 
+# Stamp: stale frames from an older timeline/scene code are deleted, valid ones are resumed
+$hashSrc = @($TimelinePath) + (Get-ChildItem (Join-Path $PSScriptRoot "*.py") | ForEach-Object { $_.FullName })
+$sha = [System.Security.Cryptography.SHA1]::Create()
+$bytes = [System.Collections.Generic.List[byte]]::new()
+foreach ($f in $hashSrc) { if (Test-Path $f) { $bytes.AddRange([System.IO.File]::ReadAllBytes($f)) } }
+$Stamp = ([BitConverter]::ToString($sha.ComputeHash($bytes.ToArray())) -replace "-", "").Substring(0, 12) + "-$Preset-$Spp-$Pct-$Fmt"
+foreach ($s in $Scenes) {
+  $d = Join-Path $ProjectDir "outl\$s"; New-Item -ItemType Directory -Force -Path $d | Out-Null
+  $stampFile = Join-Path $d ".stamp"
+  $old = if (Test-Path $stampFile) { (Get-Content $stampFile -Raw).Trim() } else { "" }
+  if ($Clean -or $old -ne $Stamp) {
+    Get-ChildItem $d -Include "f*.jpg", "f*.png" -File -Recurse | Remove-Item -Force
+    Set-Content -Path $stampFile -Value $Stamp -NoNewline
+  }
+}
+
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 $ext = if ($Fmt.ToUpper() -eq "JPEG") { "jpg" } else { "png" }
 
@@ -57,8 +77,13 @@ while ($queue.Count -gt 0 -or $active.Count -gt 0) {
       $env:PCT = "$Pct"
       $env:FMT = "$Fmt"
       $env:SHADOW_DIST = "$ShadowDist"
-      $out = & $Blender -b --factory-startup -P $RunPy -- $sid $Preset all 2>&1
-      $lines = $out | Select-String -Pattern "Error|Traceback|SCENE_OK"
+      $log = Join-Path $ProjectDir "outl\$sid.log"
+      foreach ($try in 1, 2) {
+        & $Blender -b --factory-startup -P $RunPy -- $sid $Preset all *> $log
+        if (Select-String -Path $log -Pattern "SCENE_OK" -Quiet) { break }
+        Write-Output "  $sid attempt $try failed (see $log), resuming..."
+      }
+      $lines = Select-String -Path $log -Pattern "Error|Traceback|RESUME|SKIP|SCENE_OK" | ForEach-Object { $_.Line }
       $pattern = Join-Path $ProjectDir "out\bl\$sid\f%04d.$ext"
       $mp4Out = Join-Path $BlOutDir "$sid.mp4"
       ffmpeg -loglevel error -y -framerate 30 -i $pattern -vf "scale=1080:1920:flags=lanczos" -c:v libx264 -pix_fmt yuv420p -crf 16 $mp4Out

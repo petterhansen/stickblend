@@ -3,7 +3,7 @@
   "tempo": 1.08,
   "model": "gemini-2.5-flash-preview-tts",
   "language": "en",
-  "style": "Crisp, high-energy storyteller: punchy hook, curious mid-section, dramatic pause before the twist.",
+  "style": "Speak loud, clear and full-voiced - never whisper or breathe the words. Emotional, gripping storyteller addressing the viewer directly in present tense: urgent alarmed hook, tension while things escalate, confident switch at the twist, playful open ending that loops.",
   "initial_prompt": "",
   "lines": [
     {
@@ -26,5 +26,13 @@
       "id": "loop",
       "text": "Replace with a punchy closer that loops back into the opening hook."
     }
-  ]
+  ],
+  "pauses": [
+    {
+      "line": "hook",
+      "after": "replace",
+      "sec": 0.3
+    }
+  ],
+  "_notes": "Target 30-55 s (max 60). Hook = mid-action situation in 'you'/present tense, not a question. 'pauses' adds a total pause after the first word of a line starting with 'after' (only inside real silence, <= 0.6 s). If the voice sounds whispery: change the style prompt (loud, clear, never whisper) and try another voice (e.g. Fenrir), then raise tempo."
 }
