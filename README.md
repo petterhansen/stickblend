@@ -1,5 +1,7 @@
 # Stickblend Starter Kit
 
+> **Für Agents:** Zuerst [`AGENTS.md`](AGENTS.md) lesen. Das Regelbuch hat Vorrang vor allen anderen Anleitungen.
+
 <p align="center">
   <img src="docs/showcase.gif" alt="Stickblend 2.5D character customization and animation showcase" width="720" />
 </p>

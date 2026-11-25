@@ -1,7 +1,10 @@
 ---
 name: stickblend-shorts
-description: Produce a ~55-70s vertical 2.5D stickman story short rendered in Blender 5.2 EEVEE (stickblend) and composited in Remotion (voiceover, ducked music, SFX, captions, SVG overlays). Use when asked to create a Blender 2.5D stickman short or to use the stickblend workflow.
+description: Produce a vertical (length per SHORTS-REGELN.md) 2.5D stickman story short rendered in Blender 5.2 EEVEE (stickblend) and composited in Remotion (voiceover, ducked music, SFX, captions, SVG overlays). Use when asked to create a Blender 2.5D stickman short or to use the stickblend workflow.
 ---
+
+> **Read first: [`AGENTS.md`](../AGENTS.md)** (Regelbuch für Agents: Phasen mit Abnahme, Prüfpflicht, Grundsätze). It overrides this guide. Measurable rules live in [`SHORTS-REGELN.md`](../SHORTS-REGELN.md).
+
 
 # Stickblend 2.5D Short Workflow (Blender 5.2 + Remotion)
 
@@ -52,8 +55,8 @@ Creates `<repo_root>\<slug>\` with `STORY.md`, `script.json`, `scripts/`, and `b
 
 ### 2. Story, Facts & Script
 1. Write verified facts, beat table, cast, and asset notes in `<slug>\STORY.md`.
-2. Fill `<slug>\script.json` with `voice` (e.g. `Charon`), `tempo` (e.g. `1.18`), `language`, `initial_prompt` (proper nouns for Whisper), and `lines: [{id, text}]`.
-   - Target ~150–190 words (~55–65 s).
+2. Fill `<slug>\script.json` with `voice` (e.g. `Charon`), `tempo` (`1.0` – never time-stretch the voice; shorten the text instead, see AGENTS.md §4), `language`, `initial_prompt` (proper nouns for Whisper), and `lines: [{id, text}]`.
+   - Target length: see `SHORTS-REGELN.md` (shorten the text, never speed up the voice).
 
 ### 3. Generate Voiceover & Word Timings
 Requires `GEMINI_API_KEY` (env var or `.env`), `ffmpeg`, and `faster-whisper`.

@@ -1,3 +1,5 @@
+> Arbeitsweise, Prüfpflicht und Grundsätze stehen in [`AGENTS.md`](AGENTS.md); hier stehen nur die messbaren Vorgaben.
+
 # Shorts-Regeln (verbindlich für jeden Short)
 
 Ziel: maximale Zuschauerbindung (Retention) und Algorithmus-Attraktivität auf YouTube Shorts, TikTok und Instagram Reels.
