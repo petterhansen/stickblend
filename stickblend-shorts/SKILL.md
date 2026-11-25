@@ -40,6 +40,10 @@ Hybrid pipeline for vertical animated story shorts:
 
 ## Step-by-Step Pipeline
 
+### 0. Pick a template
+- `-Template short` (default): scenes with cuts, per-scene clips.
+- `-Template onetake`: one continuous camera flight over global frames (sets bound to spoken words). **Study `examples/aufzug` first** – it is the quality bar (hook mid-action, counter, x-ray, freeze/rewind, loop). Block shots with `scripts/fake_timeline.py` before generating the voice.
+
 ### 1. Scaffold a New Short
 ```powershell
 .\stickblend-shorts\new_short.ps1 -Slug <slug>

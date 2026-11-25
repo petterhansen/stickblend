@@ -24,6 +24,13 @@ python (Join-Path $Root "stickblend\tools\polyhaven.py") --res 1k `
   cobblestone_pavement herringbone_parquet large_sandstone_blocks_01 dark_wood green_metal_rust `
   belfast_sunset_puresky kloofendal_48d_partly_cloudy_puresky
 
+# Assets der Beispiel-Shorts (examples/aufzug, examples/wolkenkratzer)
+python (Join-Path $Root "stickblend	ools\polyhaven.py") --res 1k `
+  marble_01 marble_tiles concrete_floor_02 concrete_wall_008 rough_concrete plywood `
+  Chandelier_03 sofa_03 throw_pillows_01 modern_coffee_table_01 modern_arm_chair_01 dining_table dining_chair_02 `
+  side_table_tall_01 marble_bust_01 potted_plant_02 potted_plant_04 hanging_picture_frame_02 `
+  qwantani_dusk_2_puresky
+
 if (-not (Test-Path (Join-Path $Root ".env"))) {
   Copy-Item (Join-Path $Root ".env.example") (Join-Path $Root ".env")
   Write-Host "`nCreated .env from .env.example — remember to add your GEMINI_API_KEY!"

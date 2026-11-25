@@ -1,0 +1,785 @@
+{
+ "fps": 30,
+ "total": 48.324,
+ "audio": "audio/voice.wav",
+ "lines": [
+  {
+   "id": "fall",
+   "text": "Das Seil ist gerissen. Du bist im achtzigsten Stock – und hast acht Sekunden.",
+   "words": [
+    {
+     "w": "Das",
+     "s": 0.0,
+     "e": 0.16
+    },
+    {
+     "w": "Seil",
+     "s": 0.16,
+     "e": 0.48
+    },
+    {
+     "w": "ist",
+     "s": 0.48,
+     "e": 0.66
+    },
+    {
+     "w": "gerissen.",
+     "s": 0.66,
+     "e": 1.12
+    },
+    {
+     "w": "Du",
+     "s": 1.56,
+     "e": 1.64
+    },
+    {
+     "w": "bist",
+     "s": 1.64,
+     "e": 1.86
+    },
+    {
+     "w": "im",
+     "s": 1.86,
+     "e": 2.04
+    },
+    {
+     "w": "achtzigsten",
+     "s": 2.04,
+     "e": 2.66
+    },
+    {
+     "w": "Stock",
+     "s": 2.66,
+     "e": 2.92
+    },
+    {
+     "w": "und",
+     "s": 2.92,
+     "e": 3.28
+    },
+    {
+     "w": "hast",
+     "s": 3.28,
+     "e": 3.5
+    },
+    {
+     "w": "acht",
+     "s": 3.5,
+     "e": 3.92
+    },
+    {
+     "w": "Sekunden.",
+     "s": 3.92,
+     "e": 4.46
+    }
+   ],
+   "start": 0.0,
+   "end": 4.84,
+   "dur": 4.84
+  },
+  {
+   "id": "float",
+   "text": "Dein Kaffee schwebt, deine Füße heben ab: Du fällst genauso schnell wie die Kabine.",
+   "words": [
+    {
+     "w": "Dein",
+     "s": 4.92,
+     "e": 5.1
+    },
+    {
+     "w": "Kaffee",
+     "s": 5.1,
+     "e": 5.44
+    },
+    {
+     "w": "schwebt,",
+     "s": 5.44,
+     "e": 5.7
+    },
+    {
+     "w": "deine",
+     "s": 5.9,
+     "e": 6.04
+    },
+    {
+     "w": "Füße",
+     "s": 6.04,
+     "e": 6.38
+    },
+    {
+     "w": "heben",
+     "s": 6.38,
+     "e": 6.6
+    },
+    {
+     "w": "ab:",
+     "s": 6.6,
+     "e": 6.78
+    },
+    {
+     "w": "Du",
+     "s": 7.06,
+     "e": 7.14
+    },
+    {
+     "w": "fällst",
+     "s": 7.14,
+     "e": 7.48
+    },
+    {
+     "w": "genauso",
+     "s": 7.48,
+     "e": 8.04
+    },
+    {
+     "w": "schnell",
+     "s": 8.04,
+     "e": 8.28
+    },
+    {
+     "w": "wie",
+     "s": 8.28,
+     "e": 8.42
+    },
+    {
+     "w": "die",
+     "s": 8.42,
+     "e": 8.54
+    },
+    {
+     "w": "Kabine.",
+     "s": 8.54,
+     "e": 8.86
+    }
+   ],
+   "start": 4.84,
+   "end": 9.18,
+   "dur": 4.34
+  },
+  {
+   "id": "jump",
+   "text": "Kurz vor dem Aufprall springen? Du schwebst – du kannst dich nicht mal abstoßen. Und selbst der beste Sprung macht aus zweihundertfünfundsiebzig Stundenkilometern nur zweihundertfünfundsechzig.",
+   "words": [
+    {
+     "w": "Kurz",
+     "s": 9.26,
+     "e": 9.4
+    },
+    {
+     "w": "vor",
+     "s": 9.4,
+     "e": 9.58
+    },
+    {
+     "w": "dem",
+     "s": 9.58,
+     "e": 9.66
+    },
+    {
+     "w": "Aufprall",
+     "s": 9.66,
+     "e": 10.02
+    },
+    {
+     "w": "springen?",
+     "s": 10.02,
+     "e": 10.34
+    },
+    {
+     "w": "Du",
+     "s": 10.62,
+     "e": 10.76
+    },
+    {
+     "w": "schwebst",
+     "s": 10.76,
+     "e": 11.2
+    },
+    {
+     "w": "du",
+     "s": 11.52,
+     "e": 11.56
+    },
+    {
+     "w": "kannst",
+     "s": 11.56,
+     "e": 11.74
+    },
+    {
+     "w": "dich",
+     "s": 11.74,
+     "e": 11.92
+    },
+    {
+     "w": "nicht",
+     "s": 11.92,
+     "e": 12.04
+    },
+    {
+     "w": "mal",
+     "s": 12.04,
+     "e": 12.14
+    },
+    {
+     "w": "abstoßen.",
+     "s": 12.14,
+     "e": 12.64
+    },
+    {
+     "w": "Und",
+     "s": 12.64,
+     "e": 13.04
+    },
+    {
+     "w": "selbst",
+     "s": 13.04,
+     "e": 13.26
+    },
+    {
+     "w": "der",
+     "s": 13.26,
+     "e": 13.44
+    },
+    {
+     "w": "beste",
+     "s": 13.44,
+     "e": 13.66
+    },
+    {
+     "w": "Sprung",
+     "s": 13.66,
+     "e": 13.94
+    },
+    {
+     "w": "macht",
+     "s": 13.94,
+     "e": 14.1
+    },
+    {
+     "w": "aus",
+     "s": 14.1,
+     "e": 14.26
+    },
+    {
+     "w": "zweihundertfünfundsiebzig",
+     "s": 14.26,
+     "e": 15.38
+    },
+    {
+     "w": "Stundenkilometern",
+     "s": 15.38,
+     "e": 16.0
+    },
+    {
+     "w": "nur",
+     "s": 16.0,
+     "e": 16.3
+    },
+    {
+     "w": "zweihundertfünfundsechzig.",
+     "s": 16.3,
+     "e": 17.78
+    }
+   ],
+   "start": 9.18,
+   "end": 17.7,
+   "dur": 8.52
+  },
+  {
+   "id": "lie",
+   "text": "Flach hinlegen verteilt den Aufprall – bei diesem Tempo hilft auch das nicht.",
+   "words": [
+    {
+     "w": "Flach",
+     "s": 17.78,
+     "e": 18.02
+    },
+    {
+     "w": "hinlegen",
+     "s": 18.02,
+     "e": 18.32
+    },
+    {
+     "w": "verteilt",
+     "s": 18.32,
+     "e": 18.72
+    },
+    {
+     "w": "den",
+     "s": 18.72,
+     "e": 18.84
+    },
+    {
+     "w": "Aufprall",
+     "s": 18.84,
+     "e": 19.22
+    },
+    {
+     "w": "bei",
+     "s": 19.46,
+     "e": 19.58
+    },
+    {
+     "w": "diesem",
+     "s": 19.58,
+     "e": 19.82
+    },
+    {
+     "w": "Tempo",
+     "s": 19.82,
+     "e": 20.12
+    },
+    {
+     "w": "hilft",
+     "s": 20.12,
+     "e": 20.36
+    },
+    {
+     "w": "auch",
+     "s": 20.36,
+     "e": 20.52
+    },
+    {
+     "w": "das",
+     "s": 20.52,
+     "e": 20.68
+    },
+    {
+     "w": "nicht.",
+     "s": 20.68,
+     "e": 20.84
+    }
+   ],
+   "start": 17.7,
+   "end": 21.22,
+   "dur": 3.52
+  },
+  {
+   "id": "twist",
+   "text": "Aber: Das passiert dir nicht. Über dir hängen noch weitere Seile, jedes hält die Kabine allein. Und reißen alle, merkt ein Fliehkraftregler das Tempo und rammt Stahlkeile in die Schienen. Du fällst – einen Meter.",
+   "words": [
+    {
+     "w": "Aber:",
+     "s": 21.3,
+     "e": 21.66
+    },
+    {
+     "w": "Das",
+     "s": 21.66,
+     "e": 22.36
+    },
+    {
+     "w": "passiert",
+     "s": 22.36,
+     "e": 22.7
+    },
+    {
+     "w": "dir",
+     "s": 22.7,
+     "e": 23.05
+    },
+    {
+     "w": "nicht.",
+     "s": 23.05,
+     "e": 23.4
+    },
+    {
+     "w": "Über",
+     "s": 23.4,
+     "e": 23.6
+    },
+    {
+     "w": "dir",
+     "s": 23.6,
+     "e": 23.76
+    },
+    {
+     "w": "hängen",
+     "s": 23.76,
+     "e": 23.96
+    },
+    {
+     "w": "noch",
+     "s": 23.96,
+     "e": 24.14
+    },
+    {
+     "w": "weitere",
+     "s": 24.14,
+     "e": 24.42
+    },
+    {
+     "w": "Seile,",
+     "s": 24.42,
+     "e": 24.76
+    },
+    {
+     "w": "jedes",
+     "s": 25.06,
+     "e": 25.32
+    },
+    {
+     "w": "hält",
+     "s": 25.32,
+     "e": 25.5
+    },
+    {
+     "w": "die",
+     "s": 25.5,
+     "e": 25.62
+    },
+    {
+     "w": "Kabine",
+     "s": 25.62,
+     "e": 25.92
+    },
+    {
+     "w": "allein.",
+     "s": 25.92,
+     "e": 26.26
+    },
+    {
+     "w": "Und",
+     "s": 26.26,
+     "e": 26.68
+    },
+    {
+     "w": "reißen",
+     "s": 26.68,
+     "e": 27.04
+    },
+    {
+     "w": "alle,",
+     "s": 27.04,
+     "e": 27.24
+    },
+    {
+     "w": "merkt",
+     "s": 27.52,
+     "e": 27.76
+    },
+    {
+     "w": "ein",
+     "s": 27.76,
+     "e": 27.86
+    },
+    {
+     "w": "Fliehkraftregler",
+     "s": 27.86,
+     "e": 28.58
+    },
+    {
+     "w": "das",
+     "s": 28.58,
+     "e": 28.7
+    },
+    {
+     "w": "Tempo",
+     "s": 28.7,
+     "e": 29.04
+    },
+    {
+     "w": "und",
+     "s": 29.04,
+     "e": 29.34
+    },
+    {
+     "w": "rammt",
+     "s": 29.34,
+     "e": 29.64
+    },
+    {
+     "w": "Stahlkeile",
+     "s": 29.64,
+     "e": 30.14
+    },
+    {
+     "w": "in",
+     "s": 30.14,
+     "e": 30.28
+    },
+    {
+     "w": "die",
+     "s": 30.28,
+     "e": 30.38
+    },
+    {
+     "w": "Schienen.",
+     "s": 30.38,
+     "e": 30.6
+    },
+    {
+     "w": "Du",
+     "s": 30.98,
+     "e": 31.06
+    },
+    {
+     "w": "fällst",
+     "s": 31.06,
+     "e": 31.48
+    },
+    {
+     "w": "einen",
+     "s": 31.48,
+     "e": 31.96
+    },
+    {
+     "w": "Meter.",
+     "s": 31.96,
+     "e": 32.28
+    }
+   ],
+   "start": 21.22,
+   "end": 32.62,
+   "dur": 11.4
+  },
+  {
+   "id": "history",
+   "text": "Nur einmal versagte alles: 1945 rast ein Bomber ins Empire State Building. Die Liftführerin Betty Lou Oliver stürzt fünfundsiebzig Stockwerke in die Tiefe – und überlebt. Die Luft im engen Schacht bremst die Kabine wie ein Kissen.",
+   "words": [
+    {
+     "w": "Nur",
+     "s": 32.7,
+     "e": 32.9
+    },
+    {
+     "w": "einmal",
+     "s": 32.9,
+     "e": 33.18
+    },
+    {
+     "w": "versagte",
+     "s": 33.18,
+     "e": 33.66
+    },
+    {
+     "w": "alles:",
+     "s": 33.66,
+     "e": 33.8
+    },
+    {
+     "w": "1945",
+     "s": 34.24,
+     "e": 34.8
+    },
+    {
+     "w": "rast",
+     "s": 34.8,
+     "e": 35.58
+    },
+    {
+     "w": "ein",
+     "s": 35.58,
+     "e": 35.72
+    },
+    {
+     "w": "Bomber",
+     "s": 35.72,
+     "e": 36.02
+    },
+    {
+     "w": "ins",
+     "s": 36.02,
+     "e": 36.14
+    },
+    {
+     "w": "Empire",
+     "s": 36.14,
+     "e": 36.44
+    },
+    {
+     "w": "State",
+     "s": 36.44,
+     "e": 36.64
+    },
+    {
+     "w": "Building.",
+     "s": 36.64,
+     "e": 36.88
+    },
+    {
+     "w": "Die",
+     "s": 37.26,
+     "e": 37.32
+    },
+    {
+     "w": "Liftführerin",
+     "s": 37.32,
+     "e": 37.82
+    },
+    {
+     "w": "Betty",
+     "s": 37.82,
+     "e": 38.0
+    },
+    {
+     "w": "Lou",
+     "s": 38.0,
+     "e": 38.18
+    },
+    {
+     "w": "Oliver",
+     "s": 38.18,
+     "e": 38.44
+    },
+    {
+     "w": "stürzt",
+     "s": 38.44,
+     "e": 38.74
+    },
+    {
+     "w": "fünfundsiebzig",
+     "s": 38.74,
+     "e": 39.22
+    },
+    {
+     "w": "Stockwerke",
+     "s": 39.22,
+     "e": 39.78
+    },
+    {
+     "w": "in",
+     "s": 39.78,
+     "e": 39.88
+    },
+    {
+     "w": "die",
+     "s": 39.88,
+     "e": 39.94
+    },
+    {
+     "w": "Tiefe",
+     "s": 39.94,
+     "e": 40.22
+    },
+    {
+     "w": "und",
+     "s": 40.22,
+     "e": 40.88
+    },
+    {
+     "w": "überlebt.",
+     "s": 40.88,
+     "e": 41.36
+    },
+    {
+     "w": "Die",
+     "s": 41.72,
+     "e": 41.84
+    },
+    {
+     "w": "Luft",
+     "s": 41.84,
+     "e": 42.0
+    },
+    {
+     "w": "im",
+     "s": 42.0,
+     "e": 42.18
+    },
+    {
+     "w": "engen",
+     "s": 42.18,
+     "e": 42.42
+    },
+    {
+     "w": "Schacht",
+     "s": 42.42,
+     "e": 42.65
+    },
+    {
+     "w": "bremst",
+     "s": 42.65,
+     "e": 42.88
+    },
+    {
+     "w": "die",
+     "s": 42.88,
+     "e": 42.96
+    },
+    {
+     "w": "Kabine",
+     "s": 42.96,
+     "e": 43.26
+    },
+    {
+     "w": "wie",
+     "s": 43.26,
+     "e": 43.36
+    },
+    {
+     "w": "ein",
+     "s": 43.36,
+     "e": 43.5
+    },
+    {
+     "w": "Kissen.",
+     "s": 43.5,
+     "e": 43.72
+    }
+   ],
+   "start": 32.62,
+   "end": 43.98,
+   "dur": 11.36
+  },
+  {
+   "id": "loop",
+   "text": "Also: keine Panik. Du steigst ein, drückst die Achtzig – und …",
+   "words": [
+    {
+     "w": "Also:",
+     "s": 44.06,
+     "e": 44.3
+    },
+    {
+     "w": "keine",
+     "s": 44.66,
+     "e": 44.86
+    },
+    {
+     "w": "Panik.",
+     "s": 44.86,
+     "e": 45.22
+    },
+    {
+     "w": "Du",
+     "s": 45.5,
+     "e": 45.56
+    },
+    {
+     "w": "steigst",
+     "s": 45.56,
+     "e": 45.86
+    },
+    {
+     "w": "ein,",
+     "s": 45.86,
+     "e": 45.98
+    },
+    {
+     "w": "drückst",
+     "s": 46.3,
+     "e": 46.5
+    },
+    {
+     "w": "die",
+     "s": 46.5,
+     "e": 46.54
+    },
+    {
+     "w": "Achtzig",
+     "s": 46.54,
+     "e": 46.84
+    },
+    {
+     "w": "und",
+     "s": 46.84,
+     "e": 47.4
+    }
+   ],
+   "start": 43.98,
+   "end": 48.324,
+   "dur": 4.344
+  }
+ ]
+}

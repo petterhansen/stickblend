@@ -1,0 +1,6 @@
+node_modules/
+out/
+public/bl/
+public/sfx/
+public/audio/*
+!public/audio/voice.wav

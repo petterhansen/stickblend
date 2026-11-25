@@ -49,6 +49,12 @@ cd remotion
 npx remotion render src/index.ts MyShort out/my-short/final.mp4 --codec h264 --crf 16
 ```
 
+## One-Take Shorts & Examples
+For a single continuous camera flight (no cuts) use `.\stickblend-shorts
+ew_short.ps1 -Slug my-short -Template onetake`.
+Two complete, reproducible reference shorts live in [`examples/`](examples/README.md) (`aufzug`, `wolkenkratzer`) – scene code,
+camera paths, HUD counters, captions, SFX and voice timeline included. Rules for retention and safe zones: [`SHORTS-REGELN.md`](SHORTS-REGELN.md).
+
 ## AI Agent Support
 This repository includes `.agents/skills/stickblend-shorts/SKILL.md` and `stickblend-shorts/SKILL.md`, so AI coding agents can automatically discover and run the full pipeline.
 

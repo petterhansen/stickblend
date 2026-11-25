@@ -1,0 +1,55 @@
+{
+ "voice": "Charon",
+ "tempo": 1.3,
+ "model": "gemini-2.5-flash-preview-tts",
+ "style": "Sprich wie ein packender Doku-Erzähler mit hörbarer Dramaturgie: Spannung aufbauen, Tempo und Tonhöhe deutlich variieren, Schlüsselwörter betonen (fünfzehn Stockwerke, stockdunkle Höhle, pure Luft, genial, Nichts), vor Pointen kurz innehalten, mit trocken-ironischem Unterton. Den Satz 'Technikraum? Sieht gut aus.' gelangweilt und beiläufig, wie ein anderer Sprecher",
+ "initial_prompt": "Wolkenkratzer, New York, Technikgeschosse, Bauprüfer, Besenkammer, sechsundvierzig, fünfzig-Millionen-Dollar-Blick.",
+ "pauses": [
+  {
+   "line": "cavern",
+   "after": "privatpool",
+   "sec": 0.6
+  },
+  {
+   "line": "inspector",
+   "after": "rohr",
+   "sec": 0.35
+  },
+  {
+   "line": "inspector",
+   "after": "drauf",
+   "sec": 0.5
+  },
+  {
+   "line": "penthouse",
+   "after": "stadt",
+   "sec": 0.45
+  }
+ ],
+ "lines": [
+  {
+   "id": "lobby",
+   "text": "Du steigst im teuersten Wolkenkratzer New Yorks in den Aufzug – und auf den Knöpfen fehlen einfach fünfzehn Stockwerke."
+  },
+  {
+   "id": "shaft",
+   "text": "Nach der dreißig kommt direkt die sechsundvierzig. Die goldenen Türen gleiten zu, der Lift schießt nach oben – und bremst nirgendwo dazwischen ab."
+  },
+  {
+   "id": "cavern",
+   "text": "Du erwartest ein geheimes Casino oder einen Privatpool. Doch hinter dem Beton liegt nur eine fünfzig Meter hohe, stockdunkle Höhle – zwei einsame Rohre, pfeifender Wind, sonst nichts. In einer Stadt, in der eine Besenkammer eine Million kostet, baut jemand fünfzehn Stockwerke pure Luft."
+  },
+  {
+   "id": "inspector",
+   "text": "Ein Bauprüfer klopft kurz an ein Rohr: „Technikraum? Sieht gut aus.“ – und drückt den Stempel drauf."
+  },
+  {
+   "id": "skyline",
+   "text": "Klingt verrückt? Ist genial. Siehst du: Die Stadt erlaubt nur eine feste Menge Wohnfläche. Baue sie unten, und du starrst auf die graue Nachbarwand. Also macht der Bauherr genau das, was du auf einem Konzert tust: Er stapelt leere Kisten unter sich. Denn „Technikgeschosse“ zählen nicht als Wohnfläche – sie heben die Wohnungen legal über alle Dächer hinaus."
+  },
+  {
+   "id": "penthouse",
+   "text": "Die Aufzugtür öffnet sich, vor dir liegt der fünfzig-Millionen-Dollar-Blick über die ganze Stadt – getragen von fünfzehn Stockwerken offiziell genehmigtem Nichts."
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "voice": "Fenrir",
+ "tempo": 1.25,
+ "model": "gemini-2.5-flash-preview-tts",
+ "style": "Sprich laut, klar und kraftvoll mit voller Stimme, niemals flüstern oder hauchen. Voller Emotion, direkt an den Zuhörer gerichtet, im Präsens: dringlicher Hook, Spannung beim Eskalieren, selbstbewusster Umschwung beim Twist, offenes Ende, das in den Anfang zurückführt.",
+ "initial_prompt": "Eigennamen und Fachbegriffe hier, damit Whisper sie richtig erkennt.",
+ "pauses": [
+  {"line": "hook", "after": "jetzt", "sec": 0.3}
+ ],
+ "lines": [
+  {"id": "hook", "text": "Du stehst mitten im Raum – jetzt."},
+  {"id": "move", "text": "Dann gehst du durch die Tür und siehst, was dahinter wartet."}
+ ],
+ "_notes": "30-55 s (max 60). Hook = laufende Situation in Du-Form/Präsens, keine Frage. pauses = Gesamtpause nach dem Wort, nur in echter Stille, <= 0.6 s. Klingt die Stimme gehaucht: style schärfen und andere Stimme (z. B. Fenrir) probieren, dann tempo anheben."
+}

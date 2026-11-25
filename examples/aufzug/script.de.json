@@ -1,0 +1,49 @@
+{
+ "voice": "Fenrir",
+ "tempo": 1.3,
+ "model": "gemini-2.5-flash-preview-tts",
+ "style": "Sprich laut, klar und kraftvoll mit voller Stimme – niemals flüstern, niemals hauchen. Voller Emotion wie ein mitreißender Erzähler, direkt an den Zuhörer gerichtet, im Präsens. Hook-Satz dringlich und alarmiert, fast geschrien. Beim Fallen Panik und Tempo in der Stimme. Bei 'Aber:' kraftvoll umschalten: selbstbewusst, triumphierend, mit einem Lächeln in der Stimme. Die Geschichte von 1945 ernst und eindringlich, mit deutlichem Gewicht auf 'und überlebt'. Den Schluss verschmitzt und spannungsvoll, die Stimme am Ende schwebend offen lassen. Schlüsselwörter betonen: acht Sekunden, schwebst, Stahlkeile, einen Meter, fünfundsiebzig Stockwerke, achtzig",
+ "initial_prompt": "Aufzug, Seil gerissen, Fangbremse, Fliehkraftregler, Stahlkeile, Empire State Building, Betty Lou Oliver, Liftführerin, Stundenkilometer. Keine Panik, drückst die Achtzig.",
+ "pauses": [
+  {
+   "line": "fall",
+   "after": "sekunden",
+   "sec": 0.3
+  },
+  {
+   "line": "history",
+   "after": "tiefe",
+   "sec": 0.4
+  }
+ ],
+ "lines": [
+  {
+   "id": "fall",
+   "text": "Das Seil ist gerissen. Du bist im achtzigsten Stock – und hast acht Sekunden."
+  },
+  {
+   "id": "float",
+   "text": "Dein Kaffee schwebt, deine Füße heben ab: Du fällst genauso schnell wie die Kabine."
+  },
+  {
+   "id": "jump",
+   "text": "Kurz vor dem Aufprall springen? Du schwebst – du kannst dich nicht mal abstoßen. Und selbst der beste Sprung macht aus zweihundertfünfundsiebzig Stundenkilometern nur zweihundertfünfundsechzig."
+  },
+  {
+   "id": "lie",
+   "text": "Flach hinlegen verteilt den Aufprall – bei diesem Tempo hilft auch das nicht."
+  },
+  {
+   "id": "twist",
+   "text": "Aber: Das passiert dir nicht. Über dir hängen noch weitere Seile, jedes hält die Kabine allein. Und reißen alle, merkt ein Fliehkraftregler das Tempo und rammt Stahlkeile in die Schienen. Du fällst – einen Meter."
+  },
+  {
+   "id": "history",
+   "text": "Nur einmal versagte alles: 1945 rast ein Bomber ins Empire State Building. Die Liftführerin Betty Lou Oliver stürzt fünfundsiebzig Stockwerke in die Tiefe – und überlebt. Die Luft im engen Schacht bremst die Kabine wie ein Kissen."
+  },
+  {
+   "id": "loop",
+   "text": "Also: keine Panik. Du steigst ein, drückst die Achtzig – und …"
+  }
+ ]
+}
