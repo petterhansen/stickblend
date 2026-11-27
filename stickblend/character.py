@@ -465,7 +465,9 @@ def build(spec, name, parent_coll=None):
 
 def animate(ch, fn, frames, step=2, start=1):
     """fn(t) -> dict(rig=..., mood=..., blink=..., mouth=...). Figur wird nur jedes `step`-te Bild gesetzt (auf Zweiern)."""
-    for f in range(start, start + frames, step):
+    fs = list(range(start, start + frames, step))
+    if fs and fs[-1] != start + frames - 1: fs.append(start + frames - 1)   # letztes Bild immer setzen (Set-Grenze, Loop-Naht)
+    for f in fs:
         st = fn((f - start) / bpy.context.scene.render.fps)
         pose_frame(ch, f, st["rig"], st.get("mood", "neutral"), st.get("blink", False), st.get("mouth", 0.0), st.get("look", (0, 0)), st.get("hidden", False))
 

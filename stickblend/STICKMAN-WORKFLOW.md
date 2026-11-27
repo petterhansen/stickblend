@@ -169,6 +169,12 @@ Danach geht die PNG-Folge per `ffmpeg` in ein MP4 und von dort als Clip in die R
 **Blender-5.2-Fallen**
 - Ein Welt-Volumen (World → Volume) rendert in EEVEE alles schwarz. Für Dunst immer die Volumen-Box aus `world.sky` nehmen.
 - Dunst sparsam dosieren: 0,006 reicht, 0,018 wäscht das Bild aus.
+- `ShaderNodeMix` im Farbmodus (`data_type = "RGBA"`) hat mehrere Eingänge mit dem Namen „A“/„B“. `inputs["A"]` liefert den **Float**-Eingang, die Farbe kommt dann nie an (Fläche wird weiß). Farb-Sockets über den Typ wählen: `[s for s in mx.inputs if s.name == "A" and s.type == "RGBA"][0]`, Ausgang ebenso.
+- Objekte, die per `bpy.data.objects.new(name, src.data)` dasselbe Mesh teilen, teilen **keine** Modifier. Verformungen (Displace, Klumpen) ins Mesh selbst schreiben.
+- Sehr große Welten (Höhen in km): `clip_start` nicht unter 0,1 setzen, sonst flimmern ferne, flache Ebenen am Horizont (Z-Fighting).
+- Figuren-Animation läuft auf Zweiern. `character.animate` setzt das letzte Bild eines Bereichs immer mit, damit Set-Grenzen und Loop-Nähte stimmen.
+- Bewegt sich eine Figur schnell relativ zur Kamera (Sturz, Sprung, mitfliegende Kamera), braucht sie `step=1`: Auf Zweiern bleibt der flache 2.5D-Ausschnitt jedes zweite Bild an der alten Stelle stehen, die Figur flackert und springt.
+- Ein nahtloser Loop kommt bei `T_WRAP = NFR / FPS` (dem gedachten Bild nach dem letzten) exakt im Zustand von Bild 1 an, nicht bei `END_T`.
 
 ---
 

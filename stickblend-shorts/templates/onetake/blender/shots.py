@@ -20,6 +20,7 @@ TL = json.load(open(os.path.join(ROOT, "src", "timeline.json"), encoding="utf8")
 WORDS = [dict(w=w["w"], s=w["s"], e=w["e"], line=l["id"]) for l in TL["lines"] for w in l["words"]]
 END_T = WORDS[-1]["e"] + 0.22            # harter Schnitt kurz nach dem letzten Wort (Loop!)
 NFR = round(END_T * FPS)
+T_WRAP = NFR / FPS                        # Zeit des gedachten Bildes NFR+1 = Bild 1: ein nahtloser Loop kommt HIER exakt im Startzustand an (nicht bei END_T)
 S = specs.SPECS; P = rig.POSES
 
 def norm(s): return re.sub(r"[^\wäöüß0-9]", "", s.lower())
